@@ -66,6 +66,7 @@
                             <input type="password" class="form-control" id="parolaAuth" placeholder="Introdu parola"
                                 required>
                         </div>
+                        <div id="auth-mesaj" class="alert d-none mb-2" role="alert"></div>
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary" id="btn-intra-cont">Intră în cont
                                 (Login)</button>
@@ -85,6 +86,7 @@
     <script type="module">
         import { inregistrare, logare } from './js/auth.js';
 
+<<<<<<< HEAD
         const btnIntraCont = document.getElementById('btn-intra-cont');
         const btnCreeazaCont = document.getElementById('btn-creeaza-cont');
         const emailInput = document.getElementById('emailAuth');
@@ -169,6 +171,38 @@
 
             btnIntraCont.disabled = false;
             btnIntraCont.textContent = 'Intră în cont (Login)';
+=======
+        function afiseazaMesaj(text, tip = 'danger') {
+            const div = document.getElementById('auth-mesaj');
+            div.textContent = text;
+            div.className = `alert alert-${tip}`;
+        }
+
+        document.getElementById('btn-intra-cont').addEventListener('click', async () => {
+            const email = document.getElementById('emailAuth').value.trim();
+            const parola = document.getElementById('parolaAuth').value;
+            if (!email || !parola) { afiseazaMesaj('Completează email-ul și parola!'); return; }
+            const result = await logare(email, parola);
+            if (result.success) {
+                afiseazaMesaj('Logare reușită! 🎉', 'success');
+                setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(), 1200);
+            } else {
+                afiseazaMesaj('Eroare: ' + result.message);
+            }
+        });
+
+        document.getElementById('btn-creeaza-cont').addEventListener('click', async () => {
+            const email = document.getElementById('emailAuth').value.trim();
+            const parola = document.getElementById('parolaAuth').value;
+            if (!email || !parola) { afiseazaMesaj('Completează email-ul și parola!'); return; }
+            if (parola.length < 6) { afiseazaMesaj('Parola trebuie să aibă minim 6 caractere!'); return; }
+            const result = await inregistrare(email, parola);
+            if (result.success) {
+                afiseazaMesaj('Cont creat cu succes! 🎉 Acum poți intra în cont.', 'success');
+            } else {
+                afiseazaMesaj('Eroare: ' + result.message);
+            }
+>>>>>>> 1e8d215035c1789131bb42c3ae79c20f36161d00
         });
     </script>
 </body>
