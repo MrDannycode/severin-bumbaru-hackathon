@@ -37,48 +37,63 @@
                     </div>
                     <div class="card-body">
                         <form id="form-sesizare">
-                            <div class="mb-3">
-                                <label for="titlu" class="form-label">Titlu sesizare</label>
-                                <input type="text" class="form-control" id="titlu"
-                                    placeholder="Ex: Groapă periculoasă, Iluminat stradal defect..." required>
+
+                            <div id="sectiune-detalii">
+                                <div class="mb-3">
+                                    <label for="titlu" class="form-label">Titlu sesizare</label>
+                                    <input type="text" class="form-control" id="titlu"
+                                        placeholder="Ex: Groapă periculoasă, Iluminat stradal defect..." required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="categorie" class="form-label">Categorie</label>
+                                    <select class="form-select" id="categorie" required>
+                                        <option value="">Alege o categorie...</option>
+                                        <option value="infrastructura">Infrastructură (Gropi, Asfalt)</option>
+                                        <option value="curatenie">Curățenie și Gunoi</option>
+                                        <option value="iluminat">Iluminat Public</option>
+                                        <option value="parcuri">Parcuri și Spații Verzi</option>
+                                        <option value="altele">Altele</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="descriere" class="form-label">Descriere detaliată</label>
+                                    <textarea class="form-control" id="descriere" rows="3"
+                                        placeholder="Oferă mai multe detalii despre problemă..." required></textarea>
+                                </div>
+
+                                <button type="button" class="btn btn-secondary w-100" id="btn-mergi-la-harta">Următorul
+                                    pas: Alege Locația 🗺️</button>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="categorie" class="form-label">Categorie</label>
-                                <select class="form-select" id="categorie" required>
-                                    <option value="">Alege o categorie...</option>
-                                    <option value="infrastructura">Infrastructură (Gropi, Asfalt)</option>
-                                    <option value="curatenie">Curățenie și Gunoi</option>
-                                    <option value="iluminat">Iluminat Public</option>
-                                    <option value="parcuri">Parcuri și Spații Verzi</option>
-                                    <option value="altele">Altele</option>
-                                </select>
-                            </div>
+                            <div id="sectiune-harta" class="d-none">
+                                <button type="button" class="btn btn-outline-secondary btn-sm mb-3"
+                                    id="btn-inapoi-la-detalii">⬅ Înapoi la Detalii</button>
 
-                            <div class="mb-3">
-                                <label for="descriere" class="form-label">Descriere detaliată</label>
-                                <textarea class="form-control" id="descriere" rows="3"
-                                    placeholder="Oferă mai multe detalii despre problemă..." required></textarea>
-                            </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-primary">Alege locația pe hartă (Click pe
+                                        hartă)</label>
+                                    <div id="map-picker"></div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-primary">Alege locația pe hartă (Click pe
-                                    hartă)</label>
-                                <div id="map-picker"></div>
-
-                                <div class="row mt-2">
-                                    <div class="col">
-                                        <input type="text" class="form-control form-control-sm" id="latitudine"
-                                            placeholder="Latitudine" readonly>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" class="form-control form-control-sm" id="longitudine"
-                                            placeholder="Longitudine" readonly>
+                                    <div class="row mt-2">
+                                        <div class="col">
+                                            <input type="text" class="form-control form-control-sm" id="latitudine"
+                                                placeholder="Latitudine" readonly>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control form-control-sm" id="longitudine"
+                                                placeholder="Longitudine" readonly>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Trimite Sesizarea</button>
+                                <button type="submit" class="btn btn-primary w-100">Trimite Sesizarea</button>
+
+                                <div id="mesaj-succes" class="alert alert-success d-none mt-3 text-center" role="alert">
+                                    ✅ Sesizarea a fost înregistrată cu succes!
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -89,7 +104,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Inițializăm harta pe Galați
+        // 1. Inițializăm harta pe Galați
         var mapPicker = L.map('map-picker').setView([45.4353, 28.0073], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
@@ -97,21 +112,44 @@
 
         var marker;
 
-        // Când utilizatorul dă click pe hartă, punem un pin și completăm input-urile
+        // 2. Punem pin-ul la click
         mapPicker.on('click', function (e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
 
-            // Dacă există deja un pin, îl mutăm. Dacă nu, îl creăm.
             if (marker) {
                 marker.setLatLng(e.latlng);
             } else {
                 marker = L.marker(e.latlng).addTo(mapPicker);
             }
 
-            // Punem coordonatele în căsuțele de text de mai jos
             document.getElementById('latitudine').value = lat.toFixed(6);
             document.getElementById('longitudine').value = lng.toFixed(6);
+        });
+
+        // ==========================================
+        // 3. LOGICA PENTRU ASCUNDERE/AFIȘARE SECȚIUNI
+        // ==========================================
+        const sectiuneDetalii = document.getElementById('sectiune-detalii');
+        const sectiuneHarta = document.getElementById('sectiune-harta');
+        const btnMergiLaHarta = document.getElementById('btn-mergi-la-harta');
+        const btnInapoiLaDetalii = document.getElementById('btn-inapoi-la-detalii');
+
+        // Când apăsăm "Următorul pas"
+        btnMergiLaHarta.addEventListener('click', function () {
+            sectiuneDetalii.classList.add('d-none'); // Ascundem textele
+            sectiuneHarta.classList.remove('d-none'); // Afișăm harta
+
+            // Spunem hărții să se redeseneze corect acum că e vizibilă
+            setTimeout(function () {
+                mapPicker.invalidateSize();
+            }, 100);
+        });
+
+        // Când apăsăm "Înapoi"
+        btnInapoiLaDetalii.addEventListener('click', function () {
+            sectiuneHarta.classList.add('d-none'); // Ascundem harta
+            sectiuneDetalii.classList.remove('d-none'); // Afișăm textele
         });
     </script>
 </body>
