@@ -81,6 +81,96 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/map.js"></script>
+
+    <script type="module">
+        import { inregistrare, logare } from './js/auth.js';
+
+        const btnIntraCont = document.getElementById('btn-intra-cont');
+        const btnCreeazaCont = document.getElementById('btn-creeaza-cont');
+        const emailInput = document.getElementById('emailAuth');
+        const parolaInput = document.getElementById('parolaAuth');
+
+        // Helper: afișează un mesaj în modal
+        function afiseazaMesaj(text, tip) {
+            let mesaj = document.getElementById('auth-mesaj');
+            if (!mesaj) {
+                mesaj = document.createElement('div');
+                mesaj.id = 'auth-mesaj';
+                mesaj.className = 'mt-3 alert';
+                document.getElementById('form-auth').appendChild(mesaj);
+            }
+            mesaj.className = `mt-3 alert alert-${tip}`;
+            mesaj.textContent = text;
+        }
+
+        // Buton REGISTER
+        btnCreeazaCont.addEventListener('click', async function () {
+            const email = emailInput.value.trim();
+            const parola = parolaInput.value;
+
+            if (!email || !parola) {
+                afiseazaMesaj('Te rog completează email-ul și parola.', 'warning');
+                return;
+            }
+            if (parola.length < 6) {
+                afiseazaMesaj('Parola trebuie să aibă cel puțin 6 caractere.', 'warning');
+                return;
+            }
+
+            btnCreeazaCont.disabled = true;
+            btnCreeazaCont.textContent = 'Se creează contul...';
+
+            const rezultat = await inregistrare(email, parola);
+
+            if (rezultat.success) {
+                afiseazaMesaj('✅ Cont creat cu succes! Ești acum autentificat.', 'success');
+                document.getElementById('btnLogin').textContent = email;
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+                }, 1500);
+            } else {
+                let mesajRo = 'Eroare la creare cont.';
+                if (rezultat.message.includes('email-already-in-use')) mesajRo = 'Acest email este deja înregistrat.';
+                else if (rezultat.message.includes('invalid-email')) mesajRo = 'Adresa de email nu este validă.';
+                afiseazaMesaj('❌ ' + mesajRo, 'danger');
+            }
+
+            btnCreeazaCont.disabled = false;
+            btnCreeazaCont.textContent = 'Creează cont nou (Register)';
+        });
+
+        // Buton LOGIN
+        btnIntraCont.addEventListener('click', async function () {
+            const email = emailInput.value.trim();
+            const parola = parolaInput.value;
+
+            if (!email || !parola) {
+                afiseazaMesaj('Te rog completează email-ul și parola.', 'warning');
+                return;
+            }
+
+            btnIntraCont.disabled = true;
+            btnIntraCont.textContent = 'Se autentifică...';
+
+            const rezultat = await logare(email, parola);
+
+            if (rezultat.success) {
+                afiseazaMesaj('✅ Autentificare reușită!', 'success');
+                document.getElementById('btnLogin').textContent = email;
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+                }, 1500);
+            } else {
+                let mesajRo = 'Email sau parolă incorecte.';
+                if (rezultat.message.includes('user-not-found')) mesajRo = 'Nu există cont cu acest email.';
+                else if (rezultat.message.includes('wrong-password')) mesajRo = 'Parola este greșită.';
+                afiseazaMesaj('❌ ' + mesajRo, 'danger');
+            }
+
+            btnIntraCont.disabled = false;
+            btnIntraCont.textContent = 'Intră în cont (Login)';
+        });
+    </script>
 </body>
 
 </html>
