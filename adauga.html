@@ -152,6 +152,47 @@
             sectiuneDetalii.classList.remove('d-none'); // Afișăm textele
         });
     </script>
+
+    <!-- Salvare sesizare în Firestore -->
+    <script type="module">
+        import { db, auth } from './js/firebase.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        document.getElementById('form-sesizare').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const titlu = document.getElementById('titlu').value.trim();
+            const categorie = document.getElementById('categorie').value;
+            const descriere = document.getElementById('descriere').value.trim();
+            const lat = document.getElementById('latitudine').value;
+            const lng = document.getElementById('longitudine').value;
+
+            if (!lat || !lng) {
+                alert('Te rugăm să alegi o locație pe hartă!');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'Sesizari'), {
+                    titlu: titlu,
+                    categorie: categorie,
+                    descriere: descriere,
+                    latitudine: parseFloat(lat),
+                    longitudine: parseFloat(lng),
+                    status: 'nou',
+                    creatDe: auth.currentUser ? auth.currentUser.uid : 'anonim',
+                    creatLa: serverTimestamp()
+                });
+
+                document.getElementById('mesaj-succes').classList.remove('d-none');
+                document.getElementById('form-sesizare').reset();
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            } catch (error) {
+                alert('Eroare la trimiterea sesizării: ' + error.message);
+            }
+        });
+    </script>
+
 </body>
 
-</html>
+</html>

@@ -37,24 +37,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tabel-sesizari">
-
-                                    <tr>
-                                        <td>
-                                            <strong>Groapă pe strada Brăilei</strong><br>
-                                            <small class="text-muted">Azi, 14:30</small>
-                                        </td>
-                                        <td><span class="badge bg-secondary">Infrastructură</span></td>
-                                        <td><span class="badge bg-warning text-dark">În lucru</span></td>
-                                        <td>
-                                            <select class="form-select form-select-sm status-select">
-                                                <option value="nou">Nou</option>
-                                                <option value="in_lucru" selected>În lucru</option>
-                                                <option value="rezolvat">Rezolvat</option>
-                                                <option value="respins">Respins</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-success btn-sm btn-salveaza">Salvează</button>
+                                    <tr id="rand-loading">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                            Se încarcă sesizările...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -66,6 +52,98 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Protecție pagină: doar adminii pot accesa -->
+    <script type="module">
+        import { auth } from './js/firebase.js';
+        import { obtineRolUtilizator } from './js/auth.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { db } from './js/firebase.js';
+        import { collection, onSnapshot, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const statusLabel = {
+            'nou': '<span class="badge bg-primary">Nou</span>',
+            'in_lucru': '<span class="badge bg-warning text-dark">În lucru</span>',
+            'rezolvat': '<span class="badge bg-success">Rezolvat</span>',
+            'respins': '<span class="badge bg-danger">Respins</span>'
+        };
+
+        const categorieLabel = {
+            'infrastructura': 'Infrastructură',
+            'curatenie': 'Curățenie și Gunoi',
+            'iluminat': 'Iluminat Public',
+            'parcuri': 'Parcuri și Spații Verzi',
+            'altele': 'Altele'
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const rol = await obtineRolUtilizator(user.uid);
+            if (rol !== 'admin') {
+                alert('Acces interzis! Această pagină este disponibilă doar pentru administratori.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Admin confirmat — încărcăm sesizările în timp real
+            const q = query(collection(db, 'Sesizari'), orderBy('creatLa', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                const tbody = document.getElementById('tabel-sesizari');
+                tbody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Nu există sesizări momentan.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const s = docSnap.data();
+                    const id = docSnap.id;
+                    const data = s.creatLa ? new Date(s.creatLa.seconds * 1000).toLocaleString('ro-RO') : 'N/A';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <strong>${s.titlu || '-'}</strong><br>
+                            <small class="text-muted">${data}</small><br>
+                            <small class="text-muted fst-italic">${s.descriere || ''}</small>
+                        </td>
+                        <td><span class="badge bg-secondary">${categorieLabel[s.categorie] || s.categorie}</span></td>
+                        <td>${statusLabel[s.status] || s.status}</td>
+                        <td>
+                            <select class="form-select form-select-sm" id="select-${id}">
+                                <option value="nou" ${s.status === 'nou' ? 'selected' : ''}>Nou</option>
+                                <option value="in_lucru" ${s.status === 'in_lucru' ? 'selected' : ''}>În lucru</option>
+                                <option value="rezolvat" ${s.status === 'rezolvat' ? 'selected' : ''}>Rezolvat</option>
+                                <option value="respins" ${s.status === 'respins' ? 'selected' : ''}>Respins</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="salveazaStatus('${id}')">Salvează</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        });
+
+        // Funcție globală pentru salvarea statusului
+        window.salveazaStatus = async (id) => {
+            const select = document.getElementById('select-' + id);
+            const nouStatus = select.value;
+            try {
+                await updateDoc(doc(db, 'Sesizari', id), { status: nouStatus });
+                alert('Status actualizat cu succes!');
+            } catch (err) {
+                alert('Eroare: ' + err.message);
+            }
+        };
+    </script>
 
 </body>
 

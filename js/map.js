@@ -8,22 +8,26 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Punem un marker de probă ca să ne asigurăm că funcționează
-L.marker([45.4353, 28.0073]).addTo(map)
-    .bindPopup('Primăria Galați')
-    .openPopup();
+// Culori marker în funcție de status
+function culoareStatus(status) {
+    const culori = {
+        'nou': 'blue',
+        'in_lucru': 'orange',
+        'rezolvat': 'green',
+        'respins': 'red'
+    };
+    return culori[status] || 'blue';
+}
 
-// Funcție pe care o va apela Programatorul 2 după ce citește din Firebase
-function adaugaMarkerPeHarta(lat, lng, titlu, status) {
-    // Punem un pin nou pe hartă
+// Funcție apelată de app.js pentru fiecare sesizare din Firestore
+function adaugaMarkerPeHarta(lat, lng, titlu, status, descriere) {
     const marker = L.marker([lat, lng]).addTo(map);
-
-    // Adăugăm un popup care apare când dai click pe pin
     marker.bindPopup(`
         <strong>${titlu}</strong><br>
-        Status: ${status}
+        <em>${descriere || ''}</em><br>
+        Status: <strong>${status}</strong>
     `);
 }
 
-// Expunem funcția global pentru a putea fi folosită în app.js de colegul tău
+// Expunem funcția global
 window.adaugaMarkerPeHarta = adaugaMarkerPeHarta;
