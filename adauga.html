@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaugă Sesizare - Galați Report</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* Harta din formular va fi puțin mai mică */
+        #map-picker {
+            height: 300px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">⬅ Înapoi la Hartă</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0">Raportează o problemă nouă</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-sesizare">
+                            <div class="mb-3">
+                                <label for="titlu" class="form-label">Titlu sesizare</label>
+                                <input type="text" class="form-control" id="titlu"
+                                    placeholder="Ex: Groapă periculoasă, Iluminat stradal defect..." required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="categorie" class="form-label">Categorie</label>
+                                <select class="form-select" id="categorie" required>
+                                    <option value="">Alege o categorie...</option>
+                                    <option value="infrastructura">Infrastructură (Gropi, Asfalt)</option>
+                                    <option value="curatenie">Curățenie și Gunoi</option>
+                                    <option value="iluminat">Iluminat Public</option>
+                                    <option value="parcuri">Parcuri și Spații Verzi</option>
+                                    <option value="altele">Altele</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descriere" class="form-label">Descriere detaliată</label>
+                                <textarea class="form-control" id="descriere" rows="3"
+                                    placeholder="Oferă mai multe detalii despre problemă..." required></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-primary">Alege locația pe hartă (Click pe
+                                    hartă)</label>
+                                <div id="map-picker"></div>
+
+                                <div class="row mt-2">
+                                    <div class="col">
+                                        <input type="text" class="form-control form-control-sm" id="latitudine"
+                                            placeholder="Latitudine" readonly>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control form-control-sm" id="longitudine"
+                                            placeholder="Longitudine" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Trimite Sesizarea</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Inițializăm harta pe Galați
+        var mapPicker = L.map('map-picker').setView([45.4353, 28.0073], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(mapPicker);
+
+        var marker;
+
+        // Când utilizatorul dă click pe hartă, punem un pin și completăm input-urile
+        mapPicker.on('click', function (e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+
+            // Dacă există deja un pin, îl mutăm. Dacă nu, îl creăm.
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(mapPicker);
+            }
+
+            // Punem coordonatele în căsuțele de text de mai jos
+            document.getElementById('latitudine').value = lat.toFixed(6);
+            document.getElementById('longitudine').value = lng.toFixed(6);
+        });
+    </script>
+</body>
+
+</html>

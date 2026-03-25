@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Galați Report</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🛡️ Panou Administrare - Galați</a>
+            <a href="index.html" class="btn btn-outline-light btn-sm">Înapoi la Hartă</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3">Gestionare Sesizări</h4>
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sesizare</th>
+                                        <th>Categorie</th>
+                                        <th>Status Curent</th>
+                                        <th>Actualizează Status</th>
+                                        <th>Acțiuni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-sesizari">
+
+                                    <tr>
+                                        <td>
+                                            <strong>Groapă pe strada Brăilei</strong><br>
+                                            <small class="text-muted">Azi, 14:30</small>
+                                        </td>
+                                        <td><span class="badge bg-secondary">Infrastructură</span></td>
+                                        <td><span class="badge bg-warning text-dark">În lucru</span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm status-select">
+                                                <option value="nou">Nou</option>
+                                                <option value="in_lucru" selected>În lucru</option>
+                                                <option value="rezolvat">Rezolvat</option>
+                                                <option value="respins">Respins</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm btn-salveaza">Salvează</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
