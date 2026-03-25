@@ -70,8 +70,40 @@
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary" id="btn-intra-cont">Intră în cont
                                 (Login)</button>
-                            <button type="button" class="btn btn-outline-secondary" id="btn-creeaza-cont">Creează cont
-                                nou (Register)</button>
+                            <button type="button" class="btn btn-outline-secondary" id="btn-creeaza-cont">Creează cont nou (Register)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Înregistrare -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="registerModalLabel">Creare cont nou</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-register">
+                        <div class="mb-3">
+                            <label for="emailRegister" class="form-label">Adresă de Email</label>
+                            <input type="email" class="form-control" id="emailRegister" placeholder="nume@exemplu.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parolaRegister" class="form-label">Parolă</label>
+                            <input type="password" class="form-control" id="parolaRegister" placeholder="Minim 6 caractere" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="parolaConfirm" class="form-label">Confirmă Parola</label>
+                            <input type="password" class="form-control" id="parolaConfirm" placeholder="Repetă parola" required>
+                        </div>
+                        <div id="register-mesaj" class="alert d-none mb-2" role="alert"></div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" id="btn-confirm-register">Creează cont</button>
+                            <button type="button" class="btn btn-link text-muted" id="btn-back-login">← Înapoi la Login</button>
                         </div>
                     </form>
                 </div>
@@ -82,6 +114,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/map.js"></script>
+    <script type="module" src="js/app.js"></script>
 
     <script type="module">
         import { inregistrare, logare } from './js/auth.js';
@@ -105,16 +138,45 @@
             }
         });
 
-        document.getElementById('btn-creeaza-cont').addEventListener('click', async () => {
-            const email = document.getElementById('emailAuth').value.trim();
-            const parola = document.getElementById('parolaAuth').value;
-            if (!email || !parola) { afiseazaMesaj('Completează email-ul și parola!'); return; }
-            if (parola.length < 6) { afiseazaMesaj('Parola trebuie să aibă minim 6 caractere!'); return; }
+        // Butonul "Creează cont nou" → deschide modalul de înregistrare
+        document.getElementById('btn-creeaza-cont').addEventListener('click', () => {
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+            setTimeout(() => {
+                new bootstrap.Modal(document.getElementById('registerModal')).show();
+            }, 300);
+        });
+
+        // Butonul "Înapoi la Login" din modalul de înregistrare
+        document.getElementById('btn-back-login').addEventListener('click', () => {
+            bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+            setTimeout(() => {
+                new bootstrap.Modal(document.getElementById('loginModal')).show();
+            }, 300);
+        });
+
+        // Funcție mesaj pentru modalul de înregistrare
+        function afiseazaMesajRegister(text, tip = 'danger') {
+            const div = document.getElementById('register-mesaj');
+            div.textContent = text;
+            div.className = `alert alert-${tip}`;
+        }
+
+        // Butonul de confirmare înregistrare
+        document.getElementById('btn-confirm-register').addEventListener('click', async () => {
+            const email = document.getElementById('emailRegister').value.trim();
+            const parola = document.getElementById('parolaRegister').value;
+            const confirm = document.getElementById('parolaConfirm').value;
+            if (!email || !parola || !confirm) { afiseazaMesajRegister('Completează toate câmpurile!'); return; }
+            if (parola.length < 6) { afiseazaMesajRegister('Parola trebuie să aibă minim 6 caractere!'); return; }
+            if (parola !== confirm) { afiseazaMesajRegister('Parolele nu coincid!'); return; }
             const result = await inregistrare(email, parola);
             if (result.success) {
-                afiseazaMesaj('Cont creat cu succes! 🎉 Acum poți intra în cont.', 'success');
+                afiseazaMesajRegister('Cont creat cu succes! 🎉', 'success');
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+                }, 1500);
             } else {
-                afiseazaMesaj('Eroare: ' + result.message);
+                afiseazaMesajRegister('Eroare: ' + result.message);
             }
         });
     </script>
