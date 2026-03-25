@@ -124,7 +124,8 @@
                             </select>
                         </td>
                         <td>
-                            <button class="btn btn-success btn-sm" onclick="salveazaStatus('${id}')">Salvează</button>
+                            <button class="btn btn-success btn-sm me-1" onclick="salveazaStatus('${id}')">Salvează</button>
+                            <button class="btn btn-danger btn-sm" onclick="stergeSesizare('${id}')">Șterge</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -141,6 +142,17 @@
                 alert('Status actualizat cu succes!');
             } catch (err) {
                 alert('Eroare: ' + err.message);
+            }
+        };
+
+        // Funcție globală pentru ștergerea unei sesizări
+        window.stergeSesizare = async (id) => {
+            if (!confirm('Ești sigur că vrei să ștergi această sesizare? Acțiunea este ireversibilă.')) return;
+            try {
+                const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                await deleteDoc(doc(db, 'Sesizari', id));
+            } catch (err) {
+                alert('Eroare la ștergere: ' + err.message);
             }
         };
     </script>
