@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proiecte și Noutăți – CityFix Galați</title>
+    <meta name="description" content="Toate proiectele și noutățile privind îmbunătățirea mediului urban în Galați.">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar-custom">
+    <div class="container d-flex align-items-center justify-content-between">
+        <a class="d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+            <span style="font-size:1.5rem;">⚓</span>
+            <span class="navbar-brand-text">CityFix Galați</span>
+        </a>
+        <div class="d-flex align-items-center gap-1">
+            <a href="index.html" class="nav-link-custom">Acasă</a>
+            <a href="admin.html" class="nav-link-custom d-none" id="btnAdmin" style="color:#f0c040 !important;">Admin</a>
+            <a href="cont.html" class="btn-nav-login ms-2" id="btnLogin" style="text-decoration:none;">⚙ Cont</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width:900px;">
+    <div class="panel">
+        <div class="panel-hdr" style="font-size: 1.2rem; margin-bottom: 20px;">🏆 Toate Proiectele și Noutățile</div>
+        
+        <div class="news-list" style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Rezolvate -->
+            <div class="news-item" style="padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                <img src="https://placehold.co/80x60/1a4a2a/5cdc7a?text=🌳" alt="Parcul CFR" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex-grow: 1;">
+                    <div class="news-title" style="font-size: 1.1rem; margin-bottom: 5px;">Parcul CFR – Iluminat nou!</div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Sistemul de iluminat public a fost modernizat cu tehnologie LED pe toate aleile principale ale parcului.</div>
+                    <span class="tag tag-ok">✅ Rezolvat</span>
+                </div>
+            </div>
+
+            <div class="news-item" style="padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                <img src="https://placehold.co/80x60/4a2020/e08080?text=🛣️" alt="Drum" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex-grow: 1;">
+                    <div class="news-title" style="font-size: 1.1rem; margin-bottom: 5px;">Str. Domnească – Asfaltare finalizată</div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Lucrările de reparații asfaltice la nivelul stratului de uzură pe strada Domnească au fost recepționate și circulația a fost reluată.</div>
+                    <span class="tag tag-ok">✅ Rezolvat</span>
+                </div>
+            </div>
+
+            <!-- În lucru -->
+            <div class="news-item" style="padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                <img src="https://placehold.co/80x60/1a2a4a/80a0dc?text=🚧" alt="Canal" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex-grow: 1;">
+                    <div class="news-title" style="font-size: 1.1rem; margin-bottom: 5px;">Canalizare Str. Brăilei</div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Lucrările de modernizare a colectoarelor de canalizare continuă. Termen estimat de finalizare: finalul lunii curente.</div>
+                    <span class="tag tag-wip">🔧 În lucru</span>
+                </div>
+            </div>
+
+            <!-- Programate -->
+            <div class="news-item" style="padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                <img src="https://placehold.co/80x60/3a3a3a/aaaaaa?text=🗑️" alt="Deșeuri" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex-grow: 1;">
+                    <div class="news-title" style="font-size: 1.1rem; margin-bottom: 5px;">Modernizare puncte colectare deșeuri</div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Inițiativă pentru instalarea ghenelor subterane inteligente în cartierul Micro 19. Proiectul este în faza de achiziție.</div>
+                    <span class="tag tag-wip" style="background: rgba(255,193,7,0.2) !important; color: #ffc107 !important;">⏳ Programat</span>
+                </div>
+            </div>
+
+            <div class="news-item" style="padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                <img src="https://placehold.co/80x60/4a3a1a/e0c060?text=🚌" alt="Autobuz" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex-grow: 1;">
+                    <div class="news-title" style="font-size: 1.1rem; margin-bottom: 5px;">Noi stații de autobuz inteligente</div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Vor fi instalate panouri cu timpii de așteptare la principalele noduri de tranzit din oraș.</div>
+                    <span class="tag tag-wip" style="background: rgba(255,193,7,0.2) !important; color: #ffc107 !important;">⏳ Programat</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Autentificare CityFix</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px 22px;">
+                <form id="form-auth">
+                    <div class="mb-3">
+                        <label class="auth-lbl">Email</label>
+                        <input type="email" class="form-control auth-form-control" id="emailAuth" placeholder="nume@exemplu.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="auth-lbl">Parolă</label>
+                        <input type="password" class="form-control auth-form-control" id="parolaAuth" placeholder="Parola ta">
+                    </div>
+                    <div id="auth-mesaj" class="alert d-none mb-2"></div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" id="btn-intra-cont">Intră în cont</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn-creeaza-cont">Creează cont nou</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REGISTER -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Creare cont nou</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px 22px;">
+                <form id="form-register">
+                    <div class="mb-2">
+                        <label class="auth-lbl">Email</label>
+                        <input type="email" class="form-control auth-form-control" id="emailRegister" placeholder="nume@exemplu.com">
+                    </div>
+                    <div class="mb-2">
+                        <label class="auth-lbl">Parolă</label>
+                        <input type="password" class="form-control auth-form-control" id="parolaRegister" placeholder="Minim 6 caractere">
+                    </div>
+                    <div class="mb-3">
+                        <label class="auth-lbl">Confirmă parola</label>
+                        <input type="password" class="form-control auth-form-control" id="parolaConfirm" placeholder="Repetă parola">
+                    </div>
+                    <div id="register-mesaj" class="alert d-none mb-2"></div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success" id="btn-confirm-register">Creează cont</button>
+                        <button type="button" class="btn btn-link" style="color:rgba(255,255,255,.4);" id="btn-back-login">← Înapoi la Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ SCRIPTS ════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Refolosim app.js pentru logică login/admin vizual -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>

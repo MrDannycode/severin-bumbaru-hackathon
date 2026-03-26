@@ -14,12 +14,12 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         const rol = await obtineRolUtilizator(user.uid);
 
-        // Butonul Login → Delogare
+        // Butonul Login
         if (btnLogin) {
             btnLogin.textContent = `⚙ ${user.email}`;
             btnLogin.removeAttribute('data-bs-toggle');
             btnLogin.removeAttribute('data-bs-target');
-            btnLogin.onclick = async () => { await signOut(auth); };
+            btnLogin.onclick = null;
         }
 
         // Butonul Admin
@@ -46,8 +46,8 @@ onAuthStateChanged(auth, async (user) => {
         // Niciun utilizator logat — resetăm butonul Login
         if (btnLogin) {
             btnLogin.textContent = '⚙ Cont';
-            btnLogin.setAttribute('data-bs-toggle', 'modal');
-            btnLogin.setAttribute('data-bs-target', '#loginModal');
+            btnLogin.removeAttribute('data-bs-toggle');
+            btnLogin.removeAttribute('data-bs-target');
             btnLogin.onclick = null;
         }
         if (btnAdmin) btnAdmin.classList.add('d-none');

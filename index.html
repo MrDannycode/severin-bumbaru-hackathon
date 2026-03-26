@@ -17,303 +17,324 @@
 
 <body>
 
-<!-- ═══ NAVBAR ═══ -->
-<nav class="navbar-custom">
-    <div class="container d-flex align-items-center justify-content-between">
-        <a class="d-flex align-items-center gap-2 text-decoration-none" href="index.html">
-            <span style="font-size:1.5rem;">⚓</span>
-            <span class="navbar-brand-text">CityFix Galați</span>
-        </a>
-        <div class="d-flex align-items-center gap-1">
-            <a href="index.html" class="nav-link-custom active">Acasă</a>
-            <a href="#" class="nav-link-custom">Istoric</a>
-            <a href="#" class="nav-link-custom">Hartă</a>
-            <a href="admin.html" class="nav-link-custom d-none" id="btnAdmin" style="color:#f0c040 !important;">Admin</a>
-            <a href="cont.html" class="btn-nav-login ms-2" id="btnLogin" style="text-decoration:none;">⚙ Cont</a>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-custom">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a class="d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+                <span style="font-size:1.5rem;">⚓</span>
+                <span class="navbar-brand-text">CityFix Galați</span>
+            </a>
+            <div class="d-flex align-items-center gap-1">
+                <a href="index.html" class="nav-link-custom active">Acasă</a>
+                <a href="admin.html" class="nav-link-custom d-none" id="btnAdmin"
+                    style="color:#f0c040 !important;">Admin</a>
+                <a href="cont.html" class="btn-nav-login ms-2" id="btnLogin" style="text-decoration:none;">⚙ Cont</a>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<div class="container py-3" style="max-width:1180px;">
+    <div class="container py-3" style="max-width:1180px;">
 
-    <!-- HERO + BUTOANE CATEGORII -->
-    <div class="hero-banner">
-        <div class="hero-title">🏙️ Raportează o Problemă Acum!</div>
-        <div class="hero-sub">Apasă pe categoria potrivită – locația ta va fi detectată automat</div>
-        <div class="cats-row">
+        <!-- HERO + BUTOANE CATEGORII -->
+        <div class="hero-banner">
+            <div class="hero-title">🏙️ Raportează o Problemă Acum!</div>
+            <div class="hero-sub">Apasă pe categoria potrivită – locația ta va fi detectată automat</div>
+            <div class="cats-row">
 
-            <button class="cat-btn cat-iluminat" id="btn-iluminat"
-                onclick="openQuickReport('iluminat','Iluminat Public','💡','#1e3d60')">
-                <span class="icon">💡</span>
-                <span class="lbl">Iluminat<br>Public</span>
-            </button>
+                <button class="cat-btn cat-iluminat" id="btn-iluminat"
+                    onclick="openQuickReport('iluminat','Iluminat Public','💡','#1e3d60')">
+                    <span class="icon">💡</span>
+                    <span class="lbl">Iluminat<br>Public</span>
+                </button>
 
-            <button class="cat-btn cat-gropi" id="btn-gropi"
-                onclick="openQuickReport('infrastructura','Gropi / Căi Acces','🕳️','#332b18')">
-                <span class="icon">🕳️</span>
-                <span class="lbl">Gropi/<br>Căi de Acces</span>
-            </button>
+                <button class="cat-btn cat-gropi" id="btn-gropi"
+                    onclick="openQuickReport('infrastructura','Gropi / Căi Acces','🕳️','#332b18')">
+                    <span class="icon">🕳️</span>
+                    <span class="lbl">Gropi/<br>Căi de Acces</span>
+                </button>
 
-            <button class="cat-btn-add" id="btn-adauga"
-                onclick="openQuickReport('','Sesizare Generală','📋','#1a2a3d')">
-                <span style="font-size:1.6rem;">➕</span>
-                <span style="font-size:0.78rem;font-weight:800;">Adaugă</span>
-            </button>
+                <button class="cat-btn-add" id="btn-adauga"
+                    onclick="openQuickReport('','Sesizare Generală','📋','#1a2a3d')">
+                    <span style="font-size:1.6rem;">➕</span>
+                    <span style="font-size:0.78rem;font-weight:800;">Adaugă</span>
+                </button>
 
-            <button class="cat-btn cat-deseuri" id="btn-deseuri"
-                onclick="openQuickReport('curatenie','Gestionare Deșeuri','♻️','#14402a')">
-                <span class="icon">♻️</span>
-                <span class="lbl">Gestionare<br>Deșeuri</span>
-            </button>
+                <button class="cat-btn cat-deseuri" id="btn-deseuri"
+                    onclick="openQuickReport('curatenie','Gestionare Deșeuri','♻️','#14402a')">
+                    <span class="icon">♻️</span>
+                    <span class="lbl">Gestionare<br>Deșeuri</span>
+                </button>
 
-            <button class="cat-btn cat-infra" id="btn-infra"
-                onclick="openQuickReport('altele','Infrastructură / Altele','⚙️','#3d1420')">
-                <span class="icon">⚙️</span>
-                <span class="lbl">Infrastructură/<br>Altele</span>
-            </button>
+                <button class="cat-btn cat-infra" id="btn-infra"
+                    onclick="openQuickReport('altele','Infrastructură / Altele','⚙️','#3d1420')">
+                    <span class="icon">⚙️</span>
+                    <span class="lbl">Infrastructură/<br>Altele</span>
+                </button>
 
-            <button class="cat-btn cat-parcuri" id="btn-parcuri"
-                onclick="openQuickReport('parcuri','Spații Verzi','🌳','#1e3e14')">
-                <span class="icon">🌳</span>
-                <span class="lbl">Spații Verzi/<br>Recreere</span>
-            </button>
+                <button class="cat-btn cat-parcuri" id="btn-parcuri"
+                    onclick="openQuickReport('parcuri','Spații Verzi','🌳','#1e3e14')">
+                    <span class="icon">🌳</span>
+                    <span class="lbl">Spații Verzi/<br>Recreere</span>
+                </button>
 
-        </div>
-    </div>
-
-    <!-- MAIN ROW -->
-    <div class="row g-3">
-
-        <!-- Harta sesizări -->
-        <div class="col-md-4">
-            <div class="panel">
-                <div class="panel-hdr">📍 Sesizări Locale</div>
-                <div id="map"></div>
-                <div class="map-legend">
-                    <span><span class="dot" style="background:#dc3545;"></span>Active</span>
-                    <span><span class="dot" style="background:#0d6efd;"></span>Review</span>
-                    <span><span class="dot" style="background:#28a745;"></span>Fixed</span>
-                </div>
             </div>
         </div>
 
-        <!-- Sesizări recente -->
-        <div class="col-md-4">
-            <div class="panel" style="max-height:350px;overflow-y:auto;">
-                <div class="panel-hdr">📋 Sesizări Recente</div>
-                <div style="padding:10px 12px;" id="lista-sesizari">
-                    <div class="text-center py-4">
-                        <div class="spinner-border spinner-border-sm" style="color:#4da6ff;" role="status"></div>
-                        <div style="font-size:0.8rem;color:rgba(255,255,255,.4);margin-top:6px;">Se încarcă...</div>
+        <!-- MAIN ROW -->
+        <div class="row g-3">
+
+            <!-- Harta sesizări -->
+            <div class="col-md-4">
+                <div class="panel">
+                    <div class="panel-hdr">📍 Sesizări Locale</div>
+                    <div id="map"></div>
+                    <div class="map-legend">
+                        <span><span class="dot" style="background:#dc3545;"></span>Active</span>
+                        <span><span class="dot" style="background:#0d6efd;"></span>Review</span>
+                        <span><span class="dot" style="background:#28a745;"></span>Fixed</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Noutăți -->
-        <div class="col-md-4">
-            <div class="panel">
-                <div class="panel-hdr">🏆 Noutăți / Proiecte Rezolvate</div>
-                <div class="news-item">
-                    <img src="https://placehold.co/56x42/1a4a2a/5cdc7a?text=🌳" alt="Parcul CFR">
-                    <div><div class="news-title">Parcul CFR – Iluminat nou!</div><span class="tag tag-ok">✅ Rezolvat</span></div>
+            <!-- Sesizări recente -->
+            <div class="col-md-4">
+                <div class="panel" style="max-height:350px;overflow-y:auto;">
+                    <div class="panel-hdr">📋 Sesizări Recente</div>
+                    <div style="padding:10px 12px;" id="lista-sesizari">
+                        <div class="text-center py-4">
+                            <div class="spinner-border spinner-border-sm" style="color:#4da6ff;" role="status"></div>
+                            <div style="font-size:0.8rem;color:rgba(255,255,255,.4);margin-top:6px;">Se încarcă...</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="news-item">
-                    <img src="https://placehold.co/56x42/4a2020/e08080?text=🛣️" alt="Drum">
-                    <div><div class="news-title">Str. Domnească – Asfaltare finalizată</div><span class="tag tag-ok">✅ Rezolvat</span></div>
+            </div>
+
+            <!-- Noutăți -->
+            <div class="col-md-4">
+                <div class="panel">
+                    <div class="panel-hdr">🏆 Noutăți / Proiecte Rezolvate</div>
+                    <div class="news-item">
+                        <img src="https://placehold.co/56x42/1a4a2a/5cdc7a?text=🌳" alt="Parcul CFR">
+                        <div>
+                            <div class="news-title">Parcul CFR – Iluminat nou!</div><span class="tag tag-ok">✅
+                                Rezolvat</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="https://placehold.co/56x42/4a2020/e08080?text=🛣️" alt="Drum">
+                        <div>
+                            <div class="news-title">Str. Domnească – Asfaltare finalizată</div><span
+                                class="tag tag-ok">✅ Rezolvat</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <img src="https://placehold.co/56x42/1a2a4a/80a0dc?text=🚧" alt="Canal">
+                        <div>
+                            <div class="news-title">Canalizare Str. Brăilei</div><span class="tag tag-wip">🔧 În
+                                lucru</span>
+                        </div>
+                    </div>
+                    <a href="proiecte.html" class="news-all">→ Vezi toate proiectele</a>
                 </div>
-                <div class="news-item">
-                    <img src="https://placehold.co/56x42/1a2a4a/80a0dc?text=🚧" alt="Canal">
-                    <div><div class="news-title">Canalizare Str. Brăilei</div><span class="tag tag-wip">🔧 În lucru</span></div>
-                </div>
-                <a href="#" class="news-all">→ Vezi toate proiectele</a>
             </div>
         </div>
-    </div>
 
-    <!-- TICKER -->
-    <div class="ticker">
-        <span class="ticker-lbl">📡 Recente:</span>
-        <div id="ticker-content">
-            <span class="ticker-item">⏳ Se încarcă...</span>
+        <!-- TICKER -->
+        <div class="ticker">
+            <span class="ticker-lbl">📡 Recente:</span>
+            <div id="ticker-content">
+                <span class="ticker-item">⏳ Se încarcă...</span>
+            </div>
         </div>
-    </div>
 
-</div><!-- /container -->
+    </div><!-- /container -->
 
-<!-- ════════════════════════════════════════════════════════
+    <!-- ════════════════════════════════════════════════════════
      MODAL SESIZARE RAPIDA  — GPS primul, rest opțional
      ════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="sesizareModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="position:relative;">
+    <div class="modal fade" id="sesizareModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="position:relative;">
 
-            <!-- SUCCESS OVERLAY -->
-            <div id="sr-success">
-                <div class="sr-success-icon">✅</div>
-                <div class="sr-success-title">Sesizare trimisă!</div>
-                <div class="sr-success-sub">Administratorul a fost notificat.<br>Mulțumim!</div>
-            </div>
-
-            <!-- HEADER -->
-            <div class="sr-header" id="sr-header-bg">
-                <div class="sr-cat-badge">
-                    <span class="sr-cat-icon-big" id="sr-icon">📋</span>
-                    <div>
-                        <div class="sr-cat-title" id="sr-title">Sesizare</div>
-                        <div class="sr-cat-subtitle">Localizează problema pe hartă</div>
-                    </div>
-                </div>
-                <button class="sr-close-btn" data-bs-dismiss="modal" aria-label="Close">✕</button>
-            </div>
-
-            <!-- BODY -->
-            <div class="sr-body">
-
-                <!-- HARTA INTERACTIVA CU GPS -->
-                <div style="position:relative;">
-                    <div id="sr-map">
-                        <!-- GPS status banner -->
-                        <div class="gps-banner" id="gps-banner">
-                            <span class="gps-dot" id="gps-dot"></span>
-                            <span id="gps-text">Se detectează locația...</span>
-                        </div>
-                        <!-- Buton GPS overlay -->
-                        <button class="btn-gps-overlay" id="btn-use-gps" onclick="useMyLocation()">
-                            📍 Folosește locația mea
-                        </button>
-                    </div>
+                <!-- SUCCESS OVERLAY -->
+                <div id="sr-success">
+                    <div class="sr-success-icon">✅</div>
+                    <div class="sr-success-title">Sesizare trimisă!</div>
+                    <div class="sr-success-sub">Administratorul a fost notificat.<br>Mulțumim!</div>
                 </div>
 
-                <!-- Confirmare locație -->
-                <div id="sr-loc-confirmed">
-                    <span>✅</span>
-                    <span id="sr-loc-text">Locație plasată pe hartă</span>
-                </div>
-
-                <!-- Hint click pe hartă -->
-                <div id="sr-pin-hint">sau apasă oriunde pe hartă pentru a plasa manual pinul</div>
-
-                <!-- ────── DETALII OPTIONALE ────── -->
-                <div class="sr-optional-toggle" id="sr-toggle-btn" onclick="toggleOptional()">
-                    <span>✏️ Adaugă descriere (opțional)</span>
-                    <span class="arr" id="sr-arr">▼</span>
-                </div>
-                <div class="sr-optional-body" id="sr-optional">
-                    <div class="mb-2">
-                        <label class="form-lbl">Titlu (opțional)</label>
-                        <input type="text" class="form-control form-control-dark form-control-sm" id="sr-titlu"
-                            placeholder="Ex: Stâlp iluminat defect...">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-lbl">Descriere (opțional)</label>
-                        <textarea class="form-control form-control-dark form-control-sm" id="sr-descriere" rows="2"
-                            placeholder="Detalii suplimentare..."></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-lbl">Urgență</label>
-                        <select class="form-select form-select-sm form-select-dark" id="sr-prioritate">
-                            <option value="normala">Normală</option>
-                            <option value="urgenta">Urgentă</option>
-                            <option value="critica">Critică (Pericol public)</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-lbl">Fotografie (opțional)</label>
-                        <label class="photo-label" for="sr-poza">
-                            📷 Fă o poză sau alege din galerie
-                            <input type="file" id="sr-poza" accept="image/*" capture="environment" class="d-none">
-                        </label>
-                        <div id="sr-preview-container" class="d-none mt-2">
-                            <img id="sr-poza-preview" src="" alt="Preview"
-                                style="max-height:120px;border-radius:8px;border:1px solid rgba(255,255,255,.15);">
-                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="sr-btn-sterge">✕</button>
+                <!-- HEADER -->
+                <div class="sr-header" id="sr-header-bg">
+                    <div class="sr-cat-badge">
+                        <span class="sr-cat-icon-big" id="sr-icon">📋</span>
+                        <div>
+                            <div class="sr-cat-title" id="sr-title">Sesizare</div>
+                            <div class="sr-cat-subtitle">Localizează problema pe hartă</div>
                         </div>
                     </div>
+                    <button class="sr-close-btn" data-bs-dismiss="modal" aria-label="Close">✕</button>
                 </div>
 
-                <div id="sr-eroare" class="d-none" style="margin:6px 18px 0;padding:8px 12px;background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.3);border-radius:10px;font-size:0.82rem;color:#f08080;"></div>
+                <!-- BODY -->
+                <div class="sr-body">
 
-                <!-- SUBMIT -->
-                <button class="btn-submit-main" id="btn-sr-submit" onclick="submitSesizare()">
-                    🚀 Trimite Sesizarea la Administrator
-                </button>
-                <div style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);margin-top:7px;padding:0 18px;">
-                    Sesizarea va fi vizibilă instant pe hartă și în panoul administratorului
+                    <!-- HARTA INTERACTIVA CU GPS -->
+                    <div style="position:relative;">
+                        <div id="sr-map">
+                            <!-- GPS status banner -->
+                            <div class="gps-banner" id="gps-banner">
+                                <span class="gps-dot" id="gps-dot"></span>
+                                <span id="gps-text">Se detectează locația...</span>
+                            </div>
+                            <!-- Buton GPS overlay -->
+                            <button class="btn-gps-overlay" id="btn-use-gps" onclick="useMyLocation()">
+                                📍 Folosește locația mea
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirmare locație -->
+                    <div id="sr-loc-confirmed">
+                        <span>✅</span>
+                        <span id="sr-loc-text">Locație plasată pe hartă</span>
+                    </div>
+
+                    <!-- Hint click pe hartă -->
+                    <div id="sr-pin-hint">sau apasă oriunde pe hartă pentru a plasa manual pinul</div>
+
+                    <!-- ────── DETALII OPTIONALE ────── -->
+                    <div class="sr-optional-toggle" id="sr-toggle-btn" onclick="toggleOptional()">
+                        <span>✏️ Adaugă descriere (opțional)</span>
+                        <span class="arr" id="sr-arr">▼</span>
+                    </div>
+                    <div class="sr-optional-body" id="sr-optional">
+                        <div class="mb-2">
+                            <label class="form-lbl">Titlu (opțional)</label>
+                            <input type="text" class="form-control form-control-dark form-control-sm" id="sr-titlu"
+                                placeholder="Ex: Stâlp iluminat defect...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-lbl">Descriere (opțional)</label>
+                            <textarea class="form-control form-control-dark form-control-sm" id="sr-descriere" rows="2"
+                                placeholder="Detalii suplimentare..."></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-lbl">Urgență</label>
+                            <select class="form-select form-select-sm form-select-dark" id="sr-prioritate">
+                                <option value="normala">Normală</option>
+                                <option value="urgenta">Urgentă</option>
+                                <option value="critica">Critică (Pericol public)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-lbl">Fotografie (opțional)</label>
+                            <label class="photo-label" for="sr-poza">
+                                📷 Fă o poză sau alege din galerie
+                                <input type="file" id="sr-poza" accept="image/*" capture="environment" class="d-none">
+                            </label>
+                            <div id="sr-preview-container" class="d-none mt-2">
+                                <img id="sr-poza-preview" src="" alt="Preview"
+                                    style="max-height:120px;border-radius:8px;border:1px solid rgba(255,255,255,.15);">
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                                    id="sr-btn-sterge">✕</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sr-eroare" class="d-none"
+                        style="margin:6px 18px 0;padding:8px 12px;background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.3);border-radius:10px;font-size:0.82rem;color:#f08080;">
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <button class="btn-submit-main" id="btn-sr-submit" onclick="submitSesizare()">
+                        🚀 Trimite Sesizarea la Administrator
+                    </button>
+                    <div
+                        style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);margin-top:7px;padding:0 18px;">
+                        Sesizarea va fi vizibilă instant pe hartă și în panoul administratorului
+                    </div>
+
+                </div><!-- /sr-body -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Autentificare CityFix</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-
-            </div><!-- /sr-body -->
-        </div>
-    </div>
-</div>
-
-<!-- MODAL LOGIN -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Autentificare CityFix</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="padding:20px 22px;">
-                <form id="form-auth">
-                    <div class="mb-3">
-                        <label class="auth-lbl">Email</label>
-                        <input type="email" class="form-control auth-form-control" id="emailAuth" placeholder="nume@exemplu.com">
-                    </div>
-                    <div class="mb-3">
-                        <label class="auth-lbl">Parolă</label>
-                        <input type="password" class="form-control auth-form-control" id="parolaAuth" placeholder="Parola ta">
-                    </div>
-                    <div id="auth-mesaj" class="alert d-none mb-2"></div>
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" id="btn-intra-cont">Intră în cont</button>
-                        <button type="button" class="btn btn-outline-secondary" id="btn-creeaza-cont">Creează cont nou</button>
-                    </div>
-                </form>
+                <div class="modal-body" style="padding:20px 22px;">
+                    <form id="form-auth">
+                        <div class="mb-3">
+                            <label class="auth-lbl">Email</label>
+                            <input type="email" class="form-control auth-form-control" id="emailAuth"
+                                placeholder="nume@exemplu.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="auth-lbl">Parolă</label>
+                            <input type="password" class="form-control auth-form-control" id="parolaAuth"
+                                placeholder="Parola ta">
+                        </div>
+                        <div id="auth-mesaj" class="alert d-none mb-2"></div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="btn-intra-cont">Intră în cont</button>
+                            <button type="button" class="btn btn-outline-secondary" id="btn-creeaza-cont">Creează cont
+                                nou</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL REGISTER -->
-<div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Creare cont nou</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="padding:20px 22px;">
-                <form id="form-register">
-                    <div class="mb-2">
-                        <label class="auth-lbl">Email</label>
-                        <input type="email" class="form-control auth-form-control" id="emailRegister" placeholder="nume@exemplu.com">
-                    </div>
-                    <div class="mb-2">
-                        <label class="auth-lbl">Parolă</label>
-                        <input type="password" class="form-control auth-form-control" id="parolaRegister" placeholder="Minim 6 caractere">
-                    </div>
-                    <div class="mb-3">
-                        <label class="auth-lbl">Confirmă parola</label>
-                        <input type="password" class="form-control auth-form-control" id="parolaConfirm" placeholder="Repetă parola">
-                    </div>
-                    <div id="register-mesaj" class="alert d-none mb-2"></div>
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-success" id="btn-confirm-register">Creează cont</button>
-                        <button type="button" class="btn btn-link" style="color:rgba(255,255,255,.4);" id="btn-back-login">← Înapoi la Login</button>
-                    </div>
-                </form>
+    <!-- MODAL REGISTER -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Creare cont nou</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px 22px;">
+                    <form id="form-register">
+                        <div class="mb-2">
+                            <label class="auth-lbl">Email</label>
+                            <input type="email" class="form-control auth-form-control" id="emailRegister"
+                                placeholder="nume@exemplu.com">
+                        </div>
+                        <div class="mb-2">
+                            <label class="auth-lbl">Parolă</label>
+                            <input type="password" class="form-control auth-form-control" id="parolaRegister"
+                                placeholder="Minim 6 caractere">
+                        </div>
+                        <div class="mb-3">
+                            <label class="auth-lbl">Confirmă parola</label>
+                            <input type="password" class="form-control auth-form-control" id="parolaConfirm"
+                                placeholder="Repetă parola">
+                        </div>
+                        <div id="register-mesaj" class="alert d-none mb-2"></div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" id="btn-confirm-register">Creează
+                                cont</button>
+                            <button type="button" class="btn btn-link" style="color:rgba(255,255,255,.4);"
+                                id="btn-back-login">← Înapoi la Login</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ════ SCRIPTS ════ -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/map.js"></script>
-<script type="module" src="js/app.js"></script>
+    <!-- ════ SCRIPTS ════ -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/map.js"></script>
+    <script type="module" src="js/app.js"></script>
 
 </body>
+
 </html>
