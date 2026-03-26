@@ -683,7 +683,6 @@
     let srLat = null;
     let srLng = null;
     let srCategorie = '';
-    let srFisier = null;
     let gpsWatcher = null;
 
     /* ── Helpers ── */
@@ -857,6 +856,8 @@
         reader.readAsDataURL(file);
     }
 
+    let srPozaBase64 = null;
+
     /* ── Preview poză + Compresie la selectare ── */
     document.getElementById('sr-poza').addEventListener('change', e => {
         const file = e.target.files[0];
@@ -868,14 +869,14 @@
         document.getElementById('btn-sr-submit').disabled = true;
         
         compressImage(file, 900, (compressedFile, dataUrl) => {
-            srFisier = compressedFile;
+            srPozaBase64 = dataUrl; // Salvăm direct Base64-ul!
             document.getElementById('sr-poza-preview').src = dataUrl;
             document.getElementById('btn-sr-submit').disabled = false;
         });
     });
     
     document.getElementById('sr-btn-sterge').addEventListener('click', () => {
-        srFisier = null;
+        srPozaBase64 = null;
         document.getElementById('sr-poza').value = '';
         document.getElementById('sr-preview-container').classList.add('d-none');
     });
@@ -896,20 +897,6 @@
         btn.textContent = '⏳ Se trimite...';
 
         try {
-            // Upload poză opțional
-            let pozaURL = null;
-            if (srFisier) {
-                btn.textContent = '⏳ Se încarcă fotografia...';
-                try {
-                    const storRef = ref(storage, `sesizari/${Date.now()}_${srFisier.name.replace(/[^a-zA-Z0-9.]/g, '')}`);
-                    const snap    = await uploadBytes(storRef, srFisier);
-                    pozaURL       = await getDownloadURL(snap.ref);
-                } catch (imgErr) {
-                    console.error("Eroare upload imagine:", imgErr);
-                    throw new Error("Eroare Firebase Storage: " + (imgErr.message || JSON.stringify(imgErr)));
-                }
-            }
-
             btn.textContent = '⏳ Se salvează datele...';
             const titlu    = document.getElementById('sr-titlu').value.trim();
             const descriere = document.getElementById('sr-descriere').value.trim();
@@ -921,7 +908,7 @@
                 descriere:  descriere,
                 prioritate: prioritate,
                 status:     'nou',
-                pozaURL:    pozaURL,
+                pozaURL:    srPozaBase64, // Salvat direct codat din imagine!
                 latitudine:  srLat,
                 longitudine: srLng,
                 creatDe:    auth.currentUser ? auth.currentUser.uid : 'anonim',
