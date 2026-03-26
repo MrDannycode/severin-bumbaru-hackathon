@@ -77,7 +77,8 @@
                                     </div>
                                     <div id="preview-container" class="d-none">
                                         <img id="poza-preview" src="" alt="Preview" class="img-fluid rounded border" style="max-height: 200px;">
-                                        <button type="button" class="btn btn-sm btn-outline-danger mt-1" id="btn-sterge-poza">✕ Șterge poza</button>
+                                        <p class="text-muted small mt-1 mb-1" id="poza-nume"></p>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="btn-sterge-poza">✕ Șterge poza</button>
                                     </div>
                                 </div>
 
@@ -105,6 +106,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div id="mesaj-eroare" class="alert alert-danger d-none mt-2" role="alert"></div>
 
                                 <button type="submit" class="btn btn-primary w-100">Trimite Sesizarea</button>
 
@@ -171,13 +174,8 @@
         });
     </script>
 
-    <!-- Salvare sesizare în Firestore -->
-    <script type="module">
-        import { db, auth, storage } from './js/firebase.js';
-        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-        // Preview poză — funcționează pentru ambele inputuri
+    <!-- Preview poză - separat de Firebase Storage pentru robustețe -->
+    <script>
         let fisierSelectat = null;
 
         function handleFileSelect(file) {
@@ -187,6 +185,7 @@
             reader.onload = (e) => {
                 document.getElementById('poza-preview').src = e.target.result;
                 document.getElementById('preview-container').classList.remove('d-none');
+                document.getElementById('poza-nume').textContent = file.name;
             };
             reader.readAsDataURL(file);
         }
@@ -201,6 +200,25 @@
             document.getElementById('preview-container').classList.add('d-none');
         });
 
+        // Expunem fisierSelectat global pentru scriptul module
+        window.getFisierSelectat = () => fisierSelectat;
+        window.resetFisier = () => { fisierSelectat = null; };
+    </script>
+
+    <!-- Salvare sesizare în Firestore -->
+    <script type="module">
+        import { db, auth, storage } from './js/firebase.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const mesajEroare = document.getElementById('mesaj-eroare');
+
+        function afiseazaEroare(text) {
+            mesajEroare.textContent = text;
+            mesajEroare.classList.remove('d-none');
+            setTimeout(() => mesajEroare.classList.add('d-none'), 5000);
+        }
+
         // Submit formular
         document.getElementById('form-sesizare').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -212,21 +230,27 @@
             const lng = document.getElementById('longitudine').value;
 
             if (!lat || !lng) {
-                alert('Te rugăm să alegi o locație pe hartă!');
+                afiseazaEroare('Te rugăm să alegi o locație pe hartă!');
                 return;
             }
 
             const btnSubmit = document.querySelector('button[type="submit"]');
             btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Se trimite...';
+            btnSubmit.textContent = '⏳ Se trimite...';
 
             try {
                 // Upload poză dacă există
                 let pozaURL = null;
-                if (fisierSelectat) {
-                    const storageRef = ref(storage, `sesizari/${Date.now()}_${fisierSelectat.name}`);
-                    const snapshot = await uploadBytes(storageRef, fisierSelectat);
-                    pozaURL = await getDownloadURL(snapshot.ref);
+                const fisier = window.getFisierSelectat();
+                if (fisier) {
+                    try {
+                        const storageRef = ref(storage, `sesizari/${Date.now()}_${fisier.name}`);
+                        const snapshot = await uploadBytes(storageRef, fisier);
+                        pozaURL = await getDownloadURL(snapshot.ref);
+                    } catch (storageErr) {
+                        console.warn('Upload poză eșuat:', storageErr.message);
+                        // Continuăm fără poză dacă storage eșuează
+                    }
                 }
 
                 await addDoc(collection(db, 'Sesizari'), {
@@ -243,11 +267,11 @@
 
                 document.getElementById('mesaj-succes').classList.remove('d-none');
                 document.getElementById('form-sesizare').reset();
-                fisierSelectat = null;
+                window.resetFisier();
                 document.getElementById('preview-container').classList.add('d-none');
                 setTimeout(() => { window.location.href = 'index.html'; }, 2000);
             } catch (error) {
-                alert('Eroare la trimiterea sesizării: ' + error.message);
+                afiseazaEroare('Eroare la trimiterea sesizării: ' + error.message);
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = 'Trimite Sesizarea';
             }
