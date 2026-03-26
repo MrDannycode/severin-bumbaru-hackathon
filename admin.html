@@ -144,14 +144,13 @@
                                     <th>Sesizare</th>
                                     <th>Categorie</th>
                                     <th>Prioritate</th>
-                                    <th>Responsabil</th>
                                     <th>Status</th>
                                     <th>Acțiuni</th>
                                 </tr>
                             </thead>
                             <tbody id="tabel-sesizari">
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="5">
                                         <div class="empty-state">
                                             <div class="empty-ico">⏳</div>Se încarcă...
                                         </div>
@@ -256,6 +255,7 @@
         let filteredSesizari = []; // Salvează lista curentă pentru navigare modal
         let currentSesizareId = null; // Id-ul deschis în modal
         let allResponsabili = [];
+        let allDptAdmins = [];
         let currentDept = '';
         let currentResponsabilId = '';
 
@@ -304,6 +304,7 @@
         /* ── Init ── */
         function initAdmin() {
             loadResponsabili();
+            loadDptAdmins();
             const q = query(collection(db, 'Sesizari'), orderBy('creatLa', 'desc'));
             onSnapshot(q, snap => {
                 allSesizari = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -456,7 +457,7 @@
 
             const tbody = document.getElementById('tabel-sesizari');
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">📭</div>Nicio sesizare găsită</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-ico">📭</div>Nicio sesizare găsită</div></td></tr>';
                 return;
             }
 
@@ -473,16 +474,6 @@
             </td>
             <td><span class="badge-cat">${CAT_LABEL[s.categorie] || s.categorie}</span></td>
             <td>${PRIO_BADGE[prio] || prio}</td>
-            <td>
-                <select class="tbl-select" id="dept-${s.id}" onchange="atribuieDepartament('${s.id}',this.value)">
-                    <option value="">— Neatribuit —</option>
-                    <option value="infrastructura" ${(s.departamentAlocat || s.categorie) === 'infrastructura' ? 'selected' : ''}>🕳️ Infrastructură</option>
-                    <option value="iluminat"       ${(s.departamentAlocat || s.categorie) === 'iluminat' ? 'selected' : ''}>💡 Iluminat Public</option>
-                    <option value="curatenie"      ${(s.departamentAlocat || s.categorie) === 'curatenie' ? 'selected' : ''}>♻️ Curățenie</option>
-                    <option value="parcuri"        ${(s.departamentAlocat || s.categorie) === 'parcuri' ? 'selected' : ''}>🌳 Spații Verzi</option>
-                    <option value="altele"         ${(s.departamentAlocat || s.categorie) === 'altele' ? 'selected' : ''}>⚙️ Altele</option>
-                </select>
-            </td>
             <td>
                 <select class="tbl-select" id="status-${s.id}">
                     <option value="nou"      ${s.status === 'nou' ? 'selected' : ''}>🔵 Nou</option>
@@ -647,6 +638,16 @@
             } catch (e) { console.warn('Responsabili:', e.message); }
         }
 
+        /* ── Load DptAdmins (Users) ── */
+        async function loadDptAdmins() {
+            try {
+                // Preia toti userii pentru a gasi informatiile DptAdmins
+                const snap = await getDocs(collection(db, 'Users'));
+                allDptAdmins = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(u => u.role === 'DptAdmin');
+                renderPanelResponsabili();
+            } catch (e) { console.warn('DptAdmins:', e.message); }
+        }
+
         /* ── Render panel departamente ── */
         function renderPanelResponsabili() {
             const panel = document.getElementById('panel-responsabili');
@@ -665,11 +666,16 @@
                 const color = DEPT_COLORS[dept.key] || '#60a5fa';
                 const resps = allResponsabili.filter(r => r.departament === dept.key);
                 const sesCount = allSesizari.filter(s => s.categorie === dept.key).length;
+                const dptUser = allDptAdmins.find(u => u.departamentAsociat === dept.key);
+                const emailStr = dptUser ? dptUser.email : '— Lipsă cont administrator —';
 
                 html += `<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:rgba(255,255,255,.03);">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
                         <div style="font-size:.82rem;font-weight:700;color:${color};">${dept.label}</div>
                         <div style="font-size:.7rem;color:rgba(255,255,255,.3);">${sesCount} sesizări</div>
+                    </div>
+                    <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:8px; display:flex; gap:5px; align-items:center;">
+                        <span style="font-size:.85rem; opacity:0.8;">📧</span> <span style="font-family:monospace; background:rgba(0,0,0,0.2); padding:2px 5px; border-radius:4px;">${emailStr}</span>
                     </div>`;
 
                 if (!resps.length) {
