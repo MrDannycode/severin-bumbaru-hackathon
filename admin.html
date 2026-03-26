@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CityFix Admin – Galați</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -423,6 +424,7 @@
 
 
 <!-- ═══ SCRIPTS ═══ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
@@ -627,11 +629,14 @@ window.salveazaStatus = async function(id) {
 };
 
 /* ── Detalii ── */
+let detaliiMap = null;
+
 window.veziDetalii = function(id) {
     const s = allSesizari.find(s=>s.id===id);
     if (!s) return;
     const data = s.creatLa ? new Date(s.creatLa.seconds*1000).toLocaleString('ro-RO') : '—';
     const resp = allResponsabili.find(r=>r.id===s.responsabilId);
+    
     document.getElementById('modal-detalii-body').innerHTML = `
         <div class="row g-3">
             <div class="col-md-6">
@@ -645,12 +650,27 @@ window.veziDetalii = function(id) {
             </div>
             <div class="col-md-6">
                 ${s.descriere?`<div class="detail-field"><div class="detail-lbl">Descriere</div><div class="detail-val" style="white-space:pre-wrap;">${s.descriere}</div></div>`:''}
-                ${s.latitudine&&s.longitudine?`<div class="detail-field"><div class="detail-lbl">Coordonate GPS</div><div class="detail-val">📍 ${s.latitudine.toFixed(5)}, ${s.longitudine.toFixed(5)}<br><a href="https://maps.google.com/?q=${s.latitudine},${s.longitudine}" target="_blank" style="font-size:.78rem;color:#60a5fa;">Deschide în Google Maps ↗</a></div></div>`:''}
-                ${s.pozaURL?`<div class="detail-field"><div class="detail-lbl">Fotografie</div><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" style="max-width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.1);margin-top:4px;"></a></div>`:''}
-                <div class="detail-field"><div class="detail-lbl">Creat de</div><div class="detail-val" style="font-size:.72rem;opacity:.4;">${s.creatDe||'anonim'}</div></div>
+                ${s.pozaURL?`<div class="detail-field"><div class="detail-lbl">Fotografie atașată</div><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" style="max-height:180px; max-width:100%; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.1); margin-top:4px; transition: transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"></a></div>`:''}
+                ${s.latitudine&&s.longitudine?`<div class="detail-field"><div class="detail-lbl">Coordonate GPS</div><div class="detail-val">📍 ${s.latitudine.toFixed(5)}, ${s.longitudine.toFixed(5)}<br><a href="https://maps.google.com/?q=${s.latitudine},${s.longitudine}" target="_blank" style="font-size:.78rem;color:#60a5fa;">Deschide în Google Maps ↗</a></div><div id="map-detalii" style="height:150px; width:100%; border-radius:8px; margin-top:8px; border:1px solid rgba(255,255,255,0.1); z-index:1;"></div></div>`:''}
+                <div class="detail-field" style="margin-top:10px;"><div class="detail-lbl">Creat de</div><div class="detail-val" style="font-size:.72rem;opacity:.4;">${s.creatDe||'anonim'}</div></div>
             </div>
         </div>`;
-    new bootstrap.Modal(document.getElementById('modalDetalii')).show();
+    
+    const myModalEl = document.getElementById('modalDetalii');
+    const myModal = new bootstrap.Modal(myModalEl);
+    myModal.show();
+    
+    myModalEl.addEventListener('shown.bs.modal', function initMap() {
+        myModalEl.removeEventListener('shown.bs.modal', initMap);
+        if (s.latitudine && s.longitudine) {
+            if (detaliiMap) {
+                detaliiMap.remove();
+            }
+            detaliiMap = L.map('map-detalii', { zoomControl: false }).setView([s.latitudine, s.longitudine], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detaliiMap);
+            L.marker([s.latitudine, s.longitudine]).addTo(detaliiMap);
+        }
+    });
 };
 
 /* ── Șterge sesizare ── */
