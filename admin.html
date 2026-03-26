@@ -324,6 +324,14 @@
                         <option value="urgenta">🟠 Urgentă</option>
                         <option value="normala">Normală</option>
                     </select>
+                    <select class="filter-select" id="f-categorie" onchange="aplicaFiltre()">
+                        <option value="">Toate categoriile</option>
+                        <option value="infrastructura">🕳️ Infrastructură</option>
+                        <option value="iluminat">💡 Iluminat Public</option>
+                        <option value="curatenie">♻️ Curățenie</option>
+                        <option value="parcuri">🌳 Spații Verzi</option>
+                        <option value="altele">⚙️ Altele</option>
+                    </select>
                 </div>
 
                 <div class="admin-table-wrap">
@@ -538,9 +546,11 @@ function renderTable() {
     const search  = (document.getElementById('f-search')?.value||'').toLowerCase();
     const fSt     = document.getElementById('f-status')?.value||'';
     const fPr     = document.getElementById('f-prioritate')?.value||'';
+    const fCat    = document.getElementById('f-categorie')?.value||'';
 
     let rows = allSesizari;
     if (currentDept) rows = rows.filter(s=>s.categorie===currentDept);
+    if (fCat)        rows = rows.filter(s=>s.categorie===fCat);
     if (fSt)         rows = rows.filter(s=>s.status===fSt);
     if (fPr)         rows = rows.filter(s=>s.prioritate===fPr);
     if (search)      rows = rows.filter(s=>
