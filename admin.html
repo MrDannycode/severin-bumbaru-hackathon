@@ -166,19 +166,11 @@
 
                 <!-- PANEL RESPONSABILI -->
                 <div>
-                    <div class="sec-hdr">
-                        <div class="sec-title">
-                            <span class="sec-dot" style="background:#22c55e;"></span>
-                            Echipa
-                        </div>
-                    </div>
+                    <div class="sec-hdr"></div>
                     <div class="panel-card">
-                        <div class="panel-hdr">
-                            👥 Responsabili
-                            <button class="act-btn save" style="font-size:.7rem;padding:3px 9px;"
-                                onclick="new bootstrap.Modal(document.getElementById('modalAdaugaResp')).show()">
-                                + Adaugă
-                            </button>
+                        <div class="panel-hdr" style="padding:0;gap:0;background:transparent;border-bottom:none;">
+                            <button id="tab-dept" onclick="switchTab('dept')" style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#1e3a5f;color:#60a5fa;border:none;border-radius:8px 0 0 8px;cursor:pointer;">DEPARTAMENTE</button>
+                            <button id="tab-add" onclick="switchTab('add')" style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#14263d;color:rgba(255,255,255,.4);border:none;border-radius:0 8px 8px 0;cursor:pointer;">ADAUGĂ</button>
                         </div>
                         <div class="panel-body" id="panel-responsabili">
                             <div class="empty-state">
@@ -262,6 +254,7 @@
         let allSesizari = [];
         let allResponsabili = [];
         let currentDept = '';
+        let currentResponsabilId = '';
 
         /* ── Constante ── */
         const CAT_LABEL = {
@@ -365,9 +358,70 @@
             document.getElementById('f-prioritate').value = '';
             document.getElementById('f-categorie').value = '';
             currentDept = '';
+            currentResponsabilId = '';
             document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
             document.getElementById('sb-all')?.classList.add('active');
             renderTable();
+        };
+
+        window.filtreazaDupaResponsabil = function(id, nume) {
+            currentResponsabilId = id;
+            toast(`Sesizări alocate lui ${nume} 🔍`);
+            renderTable();
+        };
+
+        window.switchTab = function(tab) {
+            const btnDept = document.getElementById('tab-dept');
+            const btnAdd  = document.getElementById('tab-add');
+            const panel   = document.getElementById('panel-responsabili');
+            if (tab === 'dept') {
+                btnDept.style.background = '#1e3a5f'; btnDept.style.color = '#60a5fa';
+                btnAdd.style.background  = '#14263d'; btnAdd.style.color  = 'rgba(255,255,255,.4)';
+                renderPanelResponsabili();
+            } else {
+                btnDept.style.background = '#14263d'; btnDept.style.color = 'rgba(255,255,255,.4)';
+                btnAdd.style.background  = '#1e3a5f'; btnAdd.style.color  = '#60a5fa';
+                panel.innerHTML = `
+                    <div style="padding:14px 2px;">
+                        <div class="mb-3">
+                            <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;display:block;">Nume complet *</label>
+                            <input type="text" class="form-control mfc" id="r-nume-inline" placeholder="Ex: Ion Popescu" style="font-size:.82rem;">
+                        </div>
+                        <div class="mb-3">
+                            <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;display:block;">Departament *</label>
+                            <select class="form-select mfc" id="r-dept-inline" style="font-size:.82rem;">
+                                <option value="infrastructura">🙳️ Infrastructură</option>
+                                <option value="iluminat">💡 Iluminat Public</option>
+                                <option value="curatenie">♻️ Curățenie</option>
+                                <option value="parcuri">🌳 Spații Verzi</option>
+                                <option value="altele">⚙️ Altele</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;display:block;">Telefon (opțional)</label>
+                            <input type="text" class="form-control mfc" id="r-tel-inline" placeholder="07xx xxx xxx" style="font-size:.82rem;">
+                        </div>
+                        <div id="r-eroare-inline" class="d-none" style="background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.27);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#f87171;margin-bottom:10px;"></div>
+                        <button class="btn btn-success w-100" style="font-size:.82rem;" onclick="salveazaResponsabilInline()">+ Adaugă Responsabil</button>
+                    </div>`;
+            }
+        };
+
+        window.salveazaResponsabilInline = async function() {
+            const nume = document.getElementById('r-nume-inline')?.value.trim();
+            const dept = document.getElementById('r-dept-inline')?.value;
+            const tel  = document.getElementById('r-tel-inline')?.value.trim();
+            const err  = document.getElementById('r-eroare-inline');
+            if (!nume) { err.textContent = 'Introdu numele!'; err.classList.remove('d-none'); return; }
+            err.classList.add('d-none');
+            try {
+                const ref = await addDoc(collection(db, 'Responsabili'), {
+                    nume, departament: dept, telefon: tel || '', creatLa: serverTimestamp()
+                });
+                allResponsabili.push({ id: ref.id, nume, departament: dept, telefon: tel || '' });
+                toast(`${nume} adăugat ✓`);
+                switchTab('dept');
+            } catch(e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
         };
 
         /* ── Render table ── */
@@ -382,6 +436,7 @@
             if (fCat) rows = rows.filter(s => s.categorie === fCat);
             if (fSt) rows = rows.filter(s => s.status === fSt);
             if (fPr) rows = rows.filter(s => s.prioritate === fPr);
+            if (currentResponsabilId) rows = rows.filter(s => s.responsabilId === currentResponsabilId);
             if (search) rows = rows.filter(s =>
                 (s.titlu || '').toLowerCase().includes(search) ||
                 (s.descriere || '').toLowerCase().includes(search) ||
@@ -399,7 +454,6 @@
                     ? new Date(s.creatLa.seconds * 1000).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                     : '—';
                 const prio = s.prioritate || 'normala';
-                const respOpts = buildRespOptions(s.categorie, s.responsabilId || '');
                 return `<tr>
             <td style="max-width:190px;">
                 <div style="font-weight:600;color:#e0e6f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82rem;" title="${s.titlu || ''}">${s.titlu || '(fără titlu)'}</div>
@@ -409,9 +463,13 @@
             <td><span class="badge-cat">${CAT_LABEL[s.categorie] || s.categorie}</span></td>
             <td>${PRIO_BADGE[prio] || prio}</td>
             <td>
-                <select class="tbl-select" id="resp-${s.id}" onchange="atribuieResponsabil('${s.id}',this.value)">
+                <select class="tbl-select" id="dept-${s.id}" onchange="atribuieDepartament('${s.id}',this.value)">
                     <option value="">— Neatribuit —</option>
-                    ${respOpts}
+                    <option value="infrastructura" ${(s.departamentAlocat||s.categorie)==='infrastructura'?'selected':''}>🙳️ Infrastructură</option>
+                    <option value="iluminat"       ${(s.departamentAlocat||s.categorie)==='iluminat'?'selected':''}>💡 Iluminat Public</option>
+                    <option value="curatenie"      ${(s.departamentAlocat||s.categorie)==='curatenie'?'selected':''}>♻️ Curățenie</option>
+                    <option value="parcuri"        ${(s.departamentAlocat||s.categorie)==='parcuri'?'selected':''}>🌳 Spații Verzi</option>
+                    <option value="altele"         ${(s.departamentAlocat||s.categorie)==='altele'?'selected':''}>⚙️ Altele</option>
                 </select>
             </td>
             <td>
@@ -442,7 +500,18 @@
             ).join('');
         }
 
-        /* ── Atribuie responsabil ── */
+        /* ── Atribuie departament (redirect sesizare) ── */
+        window.atribuieDepartament = async function (sesId, dept) {
+            try {
+                await updateDoc(doc(db, 'Sesizari', sesId), {
+                    departamentAlocat: dept,
+                    ...(dept ? { status: 'in_lucru' } : {})
+                });
+                toast(dept ? `Redirectionat la: ${CAT_LABEL[dept] || dept}` : 'Alocare eliminată');
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        /* ── Atribuie responsabil (persoana) ── */
         window.atribuieResponsabil = async function (sesId, respId) {
             try {
                 const resp = allResponsabili.find(r => r.id === respId);
@@ -530,40 +599,64 @@
             } catch (e) { console.warn('Responsabili:', e.message); }
         }
 
-        /* ── Render panel responsabili ── */
+        /* ── Render panel departamente ── */
         function renderPanelResponsabili() {
             const panel = document.getElementById('panel-responsabili');
             if (!panel) return;
-            if (!allResponsabili.length) {
-                panel.innerHTML = '<div class="empty-state"><div class="empty-ico">👥</div>Niciun responsabil adăugat.<br><small>Apasă "+ Adaugă" pentru a adăuga.</small></div>';
-                return;
-            }
-            const depts = ['infrastructura', 'iluminat', 'curatenie', 'parcuri', 'altele'];
+
+            const depts = [
+                { key: 'infrastructura', label: '🙳️ Infrastructură' },
+                { key: 'iluminat',       label: '💡 Iluminat Public' },
+                { key: 'curatenie',      label: '♻️ Curățenie' },
+                { key: 'parcuri',        label: '🌳 Spații Verzi' },
+                { key: 'altele',         label: '⚙️ Altele' }
+            ];
+
+            const DEPT_COLORS = {
+                infrastructura: '#f59e0b', iluminat: '#60a5fa',
+                curatenie: '#4ade80', parcuri: '#86efac', altele: '#a78bfa'
+            };
+
             let html = '';
             depts.forEach(dept => {
-                const resp = allResponsabili.filter(r => r.departament === dept);
-                if (!resp.length) return;
-                html += `<div class="dept-section">
-            <div class="dept-name">${CAT_LABEL[dept] || dept}</div>
-            ${resp.map(r => {
-                    const active = allSesizari.filter(s => s.responsabilId === r.id && s.status === 'in_lucru').length;
-                    const total = allSesizari.filter(s => s.responsabilId === r.id).length;
-                    const pct = total ? Math.min(Math.round(active / total * 100), 100) : 0;
-                    const color = DEPT_COLORS[dept] || '#60a5fa';
-                    const init = r.nume.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
-                    return `<div class="resp-item">
-                    <div class="resp-avatar" style="background:${color}18;color:${color};border:1px solid ${color}35;">${init}</div>
-                    <div class="resp-info">
-                        <div class="resp-name" title="${r.telefon || ''}">${r.nume}</div>
-                        <div class="resp-stats">${active} active · ${total} total</div>
-                        <div class="resp-bar-wrap"><div class="resp-bar" style="width:${pct}%;background:${color};"></div></div>
-                    </div>
-                    <button class="act-btn del" style="font-size:.67rem;padding:2px 7px;" onclick="stergeResponsabil('${r.id}')">✕</button>
-                </div>`;
-                }).join('')}
-        </div>`;
+                const color = DEPT_COLORS[dept.key] || '#60a5fa';
+                const resps = allResponsabili.filter(r => r.departament === dept.key);
+                const sesCount = allSesizari.filter(s => s.categorie === dept.key).length;
+                const alocate = allSesizari.filter(s => s.categorie === dept.key && s.responsabilId).length;
+
+                html += `<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:rgba(255,255,255,.03);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <div style="font-size:.82rem;font-weight:700;color:${color};">${dept.label}</div>
+                        <div style="font-size:.7rem;color:rgba(255,255,255,.3);">${sesCount} sesizări</div>
+                    </div>`;
+
+                if (!resps.length) {
+                    html += `<div style="font-size:.75rem;color:rgba(255,255,255,.25);font-style:italic;">— Niciun responsabil alocat</div>`;
+                } else {
+                    resps.forEach(r => {
+                        const activeR = allSesizari.filter(s => s.responsabilId === r.id && s.status === 'in_lucru').length;
+                        const totalR  = allSesizari.filter(s => s.responsabilId === r.id).length;
+                        const init = r.nume.split(' ').map(w => w[0]||'').join('').toUpperCase().slice(0,2);
+                        const pct  = totalR ? Math.min(Math.round(activeR/totalR*100),100) : 0;
+                        html += `<div class="resp-item" style="margin-bottom:6px;">
+                            <div class="resp-avatar" style="background:${color}18;color:${color};border:1px solid ${color}35;">${init}</div>
+                            <div class="resp-info">
+                                <div class="resp-name">${r.nume}${ r.telefon ? ` <span style="font-size:.67rem;opacity:.4;">— ${r.telefon}</span>` : '' }</div>
+                                <div class="resp-stats">${activeR} active · ${totalR} total</div>
+                                <div class="resp-bar-wrap"><div class="resp-bar" style="width:${pct}%;background:${color};"></div></div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                <button class="act-btn" style="font-size:.65rem;padding:2px 7px;background:rgba(96,165,250,0.1);color:#60a5fa;border-color:rgba(96,165,250,0.2);" onclick="filtreazaDupaResponsabil('${r.id}','${r.nume}')" title="Filtrare după această persoană">🔍</button>
+                                <button class="act-btn del" style="font-size:.65rem;padding:2px 7px;" onclick="stergeResponsabil('${r.id}')">✕</button>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                html += `</div>`;
             });
-            panel.innerHTML = html || '<div class="empty-state"><div class="empty-ico">👥</div>Niciun responsabil adăugat.</div>';
+
+            panel.innerHTML = html || '<div class="empty-state"><div class="empty-ico">🏢</div>Niciun responsabil adăugat.</div>';
         }
 
         /* ── Șterge responsabil ── */
