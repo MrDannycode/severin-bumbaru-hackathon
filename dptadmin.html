@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityFix Departament – Echipe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <nav class="admin-nav">
+        <a class="nav-logo" href="index.html">⚓ <span>CityFix</span> Departament</a>
+        <div class="nav-pills">
+            <span class="nav-pill pill-total" id="np-total">⬤ — Total</span>
+            <span class="nav-pill pill-new" id="np-new">🔵 — Noi alocate</span>
+            <span class="nav-pill pill-work" id="np-work">🟡 — În lucru</span>
+        </div>
+        <div class="nav-right">
+            <span class="admin-badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;" id="badge-dept">🏢 Șef Departament</span>
+            <a href="index.html" class="btn-nav-sm">← Înapoi</a>
+        </div>
+    </nav>
+
+    <div class="admin-layout">
+
+        <aside class="sidebar">
+            <div class="sidebar-section">Echipe de teren</div>
+            <a class="sb-item active" href="#" onclick="filtrEchipa('',this);return false;" id="sb-all">
+                <div class="sb-left"><span class="sb-icon">📊</span> Toate Echipele</div>
+                <span class="sb-badge" id="cnt-all">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrEchipa('echipa_interventie',this);return false;">
+                <div class="sb-left"><span class="sb-icon">⚡</span> Intervenție Rapidă</div>
+                <span class="sb-badge" id="cnt-echipa_interventie">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrEchipa('echipa_mentenanta',this);return false;">
+                <div class="sb-left"><span class="sb-icon">🔧</span> Mentenanță</div>
+                <span class="sb-badge" id="cnt-echipa_mentenanta">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrEchipa('echipa_inspectie',this);return false;">
+                <div class="sb-left"><span class="sb-icon">👁️</span> Inspecție / Constatare</div>
+                <span class="sb-badge" id="cnt-echipa_inspectie">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrEchipa('echipa_altele',this);return false;">
+                <div class="sb-left"><span class="sb-icon">👥</span> Altele / Auxiliar</div>
+                <span class="sb-badge" id="cnt-echipa_altele">0</span>
+            </a>
+
+            <div class="sb-divider"></div>
+            <div class="sidebar-section">Membri / Angajați</div>
+            <a class="sb-item" href="#"
+                onclick="new bootstrap.Modal(document.getElementById('modalAdaugaResp')).show();return false;">
+                <div class="sb-left"><span class="sb-icon">👷‍♂️</span> Adaugă Lucrător</div>
+            </a>
+        </aside>
+
+        <main class="admin-main">
+
+            <div class="kpi-row">
+                <div class="kpi-card blue">
+                    <div class="kpi-num" id="kpi-nou">—</div>
+                    <div class="kpi-label">De alocat<br><span style="font-size:.7rem;opacity:.7;">Fără echipă</span>
+                    </div>
+                    <div class="kpi-icon">🔵</div>
+                </div>
+                <div class="kpi-card amber">
+                    <div class="kpi-num" id="kpi-lucru">—</div>
+                    <div class="kpi-label">Pe Teren<br><span style="font-size:.7rem;opacity:.7;">În lucru</span></div>
+                    <div class="kpi-icon">🔧</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="kpi-num" id="kpi-rezolvat">—</div>
+                    <div class="kpi-label">Soluționate<br><span style="font-size:.7rem;opacity:.7;">De verificat</span>
+                    </div>
+                    <div class="kpi-icon">✅</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+
+                <div>
+                    <div class="sec-hdr">
+                        <div class="sec-title">
+                            <span class="sec-dot" style="background:#4ade80;"></span>
+                            Sesizări Departament
+                        </div>
+                    </div>
+
+                    <div class="filter-bar">
+                        <input type="text" class="filter-input" id="f-search" placeholder="🔍 Caută problemă..."
+                            oninput="aplicaFiltre()" style="flex:1;min-width:160px;">
+                        <select class="filter-select" id="f-status" onchange="aplicaFiltre()">
+                            <option value="">Toate statusurile</option>
+                            <option value="nou">Nou alocate</option>
+                            <option value="in_lucru">În Lucru</option>
+                            <option value="rezolvat">Rezolvat</option>
+                        </select>
+                        <select class="filter-select" id="f-echipa" onchange="aplicaFiltre()">
+                            <option value="">Toate echipele</option>
+                            <option value="echipa_interventie">⚡ Intervenție Rapidă</option>
+                            <option value="echipa_mentenanta">🔧 Mentenanță</option>
+                            <option value="echipa_inspectie">👁️ Inspecție</option>
+                            <option value="echipa_altele">👥 Altele</option>
+                        </select>
+                        <button class="act-btn" style="height:32px; padding:0 12px; margin-left:auto;"
+                            onclick="reseteazaFiltre()">✖ Resetează</button>
+                    </div>
+
+                    <div class="admin-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Problemă semnalată</th>
+                                    <th>Prioritate</th>
+                                    <th>Echipă Alocată</th>
+                                    <th>Lucrător / Responsabil</th>
+                                    <th>Status Lucrare</th>
+                                    <th>Acțiuni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-sesizari">
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <div class="empty-ico">⏳</div>Se încarcă...
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="sec-hdr"></div>
+                    <div class="panel-card">
+                        <div class="panel-hdr" style="padding:0;gap:0;background:transparent;border-bottom:none;">
+                            <button id="tab-dept" onclick="switchTab('dept')"
+                                style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#1e3a5f;color:#60a5fa;border:none;border-radius:8px 0 0 8px;cursor:pointer;">ECHIPE</button>
+                            <button id="tab-add" onclick="switchTab('add')"
+                                style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#14263d;color:rgba(255,255,255,.4);border:none;border-radius:0 8px 8px 0;cursor:pointer;">ADAUGĂ
+                                LUCRĂTOR</button>
+                        </div>
+                        <div class="panel-body" id="panel-responsabili">
+                            <div class="empty-state">
+                                <div class="empty-ico">👥</div>Niciun lucrător adăugat
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-wrap"></div>
+
+    <div class="modal fade" id="modalDetalii" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header d-flex align-items-center">
+                    <h6 class="modal-title mb-0">📋 Ordin de Lucru / Detalii</h6>
+                    <div class="ms-auto d-flex gap-2 me-3">
+                        <button class="btn btn-sm btn-outline-secondary text-white" id="btn-prev-ses"
+                            onclick="navigheazaSesizare(-1)">⬅ Înapoi</button>
+                        <button class="btn btn-sm btn-outline-secondary text-white" id="btn-next-ses"
+                            onclick="navigheazaSesizare(1)">Înainte ➡</button>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px 22px;" id="modal-detalii-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalAdaugaResp" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">👷‍♂️ Adaugă Lucrător în Echipă</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:18px 22px;">
+                    <div class="mb-3">
+                        <label class="mlbl">Nume complet *</label>
+                        <input type="text" class="form-control mfc" id="r-nume" placeholder="Ex: Vasile Popa">
+                    </div>
+                    <div class="mb-3">
+                        <label class="mlbl">Alege Echipa *</label>
+                        <select class="form-select mfc" id="r-echipa">
+                            <option value="echipa_interventie">⚡ Intervenție Rapidă</option>
+                            <option value="echipa_mentenanta">🔧 Mentenanță</option>
+                            <option value="echipa_inspectie">👁️ Inspecție / Constatare</option>
+                            <option value="echipa_altele">👥 Altele / Auxiliar</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mlbl">Telefon de contact (opțional)</label>
+                        <input type="text" class="form-control mfc" id="r-tel" placeholder="07xx xxx xxx">
+                    </div>
+                    <div id="r-eroare" class="d-none"
+                        style="background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.27);border-radius:8px;padding:8px 12px;font-size:.8rem;color:#f87171;margin-bottom:10px;">
+                    </div>
+                    <button class="btn btn-success w-100" id="btn-salv-resp" onclick="salveazaResponsabil()">Salvează
+                        Lucrătorul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="module">
+        import { auth, db } from './js/firebase.js';
+        import { obtineRolUtilizator } from './js/auth.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import {
+            collection, query, orderBy, onSnapshot,
+            doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp, where, getDoc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        /* ── State ── */
+        let allSesizari = [];
+        let filteredSesizari = [];
+        let currentSesizareId = null;
+        let allResponsabili = [];
+        let currentEchipa = '';
+        let currentResponsabilId = '';
+
+        /* ── Constante Echipe ── */
+        const ECHIPA_LABEL = {
+            echipa_interventie: '⚡ Intervenție', echipa_mentenanta: '🔧 Mentenanță',
+            echipa_inspectie: '👁️ Inspecție', echipa_altele: '👥 Altele'
+        };
+        const ECHIPA_COLORS = {
+            echipa_interventie: '#ef4444', echipa_mentenanta: '#f59e0b',
+            echipa_inspectie: '#60a5fa', echipa_altele: '#94a3b8'
+        };
+
+        const STATUS_BADGE = {
+            nou: '<span class="badge-status bs-nou">🔵 Nou alocat</span>',
+            in_lucru: '<span class="badge-status bs-lucru">🟡 Pe Teren</span>',
+            rezolvat: '<span class="badge-status bs-rezolvat">✅ Rezolvat</span>',
+            respins: '<span class="badge-status bs-respins">❌ Imposibil tehnic</span>'
+        };
+        const PRIO_BADGE = {
+            normala: '<span class="badge-prio bp-normala">Normală</span>',
+            urgenta: '<span class="badge-prio bp-urgenta">⚠️ Urgentă</span>',
+            critica: '<span class="badge-prio bp-critica">🔴 Critică</span>'
+        };
+
+        /* ── Toast ── */
+        function toast(msg, ok = true) {
+            const wrap = document.getElementById('toast-wrap');
+            const el = document.createElement('div');
+            el.className = 'toast-msg';
+            el.innerHTML = `${ok ? '✅' : '❌'} ${msg}`;
+            wrap.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2800);
+        }
+
+        /* ── Auth guard ── */
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            const rol = await obtineRolUtilizator(user.uid);
+
+            if (rol !== 'DptAdmin') {
+                alert('Acces interzis! Doar responsabilii de departament pot accesa această pagină.');
+                window.location.href = 'index.html'; return;
+            }
+
+            // Citim departamentul asociat acestui cont
+            const userDoc = await getDoc(doc(db, 'Users', user.uid));
+            const dept = userDoc.exists() ? (userDoc.data().departamentAsociat || '') : '';
+
+            // Actualizăm badge-ul din navbar
+            const DEPT_LABEL = {
+                infrastructura: '🕳️ Infrastructură',
+                iluminat: '💡 Iluminat Public',
+                curatenie: '♻️ Curățenie',
+                parcuri: '🌳 Spații Verzi',
+                altele: '⚙️ Altele'
+            };
+            const badgeEl = document.getElementById('badge-dept');
+            if (badgeEl) badgeEl.textContent = '🏢 ' + (DEPT_LABEL[dept] || 'Departament');
+
+            initDeptAdmin(dept);
+        });
+
+        /* ── Init ── */
+        function initDeptAdmin(dept) {
+            loadResponsabili();
+
+            // Filtru: arată doar sesizările alocate acestui departament
+            let q;
+            if (dept) {
+                q = query(
+                    collection(db, 'Sesizari'),
+                    where('departamentAlocat', '==', dept),
+                    orderBy('creatLa', 'desc')
+                );
+            } else {
+                // Fallback — dacă departamentul nu e setat, arată tot
+                q = query(collection(db, 'Sesizari'), orderBy('creatLa', 'desc'));
+            }
+
+            onSnapshot(q, snap => {
+                allSesizari = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                updateKPI();
+                updateSidebarCounts();
+                renderTable();
+                renderPanelResponsabili();
+
+                if (currentSesizareId) veziDetalii(currentSesizareId, false);
+            }, (error) => {
+                console.error("Eroare Firebase:", error);
+            });
+        }
+
+        /* ── KPI ── */
+        function updateKPI() {
+            // Aici adaptam numărătoarea
+            const nou = allSesizari.filter(s => !s.echipaAlocata && s.status !== 'rezolvat').length;
+            const lucru = allSesizari.filter(s => s.status === 'in_lucru').length;
+            const rezolvat = allSesizari.filter(s => s.status === 'rezolvat').length;
+
+            document.getElementById('kpi-nou').textContent = nou;
+            document.getElementById('kpi-lucru').textContent = lucru;
+            document.getElementById('kpi-rezolvat').textContent = rezolvat;
+        }
+
+        /* ── Sidebar counts ── */
+        function updateSidebarCounts() {
+            document.getElementById('cnt-all').textContent = allSesizari.length;
+            ['echipa_interventie', 'echipa_mentenanta', 'echipa_inspectie', 'echipa_altele'].forEach(d => {
+                const el = document.getElementById('cnt-' + d);
+                if (el) el.textContent = allSesizari.filter(s => s.echipaAlocata === d).length;
+            });
+        }
+
+        /* ── Filtru echipă (global) ── */
+        window.filtrEchipa = function (echipa, el) {
+            currentEchipa = echipa;
+            document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderTable();
+        };
+
+        window.aplicaFiltre = function () { renderTable(); };
+        window.reseteazaFiltre = function () {
+            document.getElementById('f-search').value = '';
+            document.getElementById('f-status').value = '';
+            document.getElementById('f-echipa').value = '';
+            currentEchipa = '';
+            currentResponsabilId = '';
+            document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
+            document.getElementById('sb-all')?.classList.add('active');
+            renderTable();
+        };
+
+        window.filtreazaDupaResponsabil = function (id, nume) {
+            currentResponsabilId = id;
+            toast(`Filtrat după lucrătorul: ${nume} 🔍`);
+            renderTable();
+        };
+
+        /* ── Switch Tabs pt Panoul Lateral ── */
+        window.switchTab = function (tab) {
+            const btnDept = document.getElementById('tab-dept');
+            const btnAdd = document.getElementById('tab-add');
+            const panel = document.getElementById('panel-responsabili');
+            if (tab === 'dept') {
+                btnDept.style.background = '#1e3a5f'; btnDept.style.color = '#60a5fa';
+                btnAdd.style.background = '#14263d'; btnAdd.style.color = 'rgba(255,255,255,.4)';
+                renderPanelResponsabili();
+            } else {
+                btnDept.style.background = '#14263d'; btnDept.style.color = 'rgba(255,255,255,.4)';
+                btnAdd.style.background = '#1e3a5f'; btnAdd.style.color = '#60a5fa';
+                panel.innerHTML = `
+                    <div style="padding:14px 2px;">
+                        <div class="mb-3">
+                            <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;">Nume Lucrător *</label>
+                            <input type="text" class="form-control mfc" id="r-nume-inline" placeholder="Ex: Vasile Popa">
+                        </div>
+                        <div class="mb-3">
+                            <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;">Echipă *</label>
+                            <select class="form-select mfc" id="r-echipa-inline">
+                                <option value="echipa_interventie">⚡ Intervenție Rapidă</option>
+                                <option value="echipa_mentenanta">🔧 Mentenanță</option>
+                                <option value="echipa_inspectie">👁️ Inspecție / Constatare</option>
+                                <option value="echipa_altele">👥 Altele / Auxiliar</option>
+                            </select>
+                        </div>
+                        <div id="r-eroare-inline" class="d-none text-danger mb-2" style="font-size:0.8rem;"></div>
+                        <button class="btn btn-success w-100" onclick="salveazaResponsabilInline()">+ Adaugă Lucrător</button>
+                    </div>`;
+            }
+        };
+
+        window.salveazaResponsabilInline = async function () {
+            const nume = document.getElementById('r-nume-inline')?.value.trim();
+            const echipa = document.getElementById('r-echipa-inline')?.value;
+            const err = document.getElementById('r-eroare-inline');
+            if (!nume) { err.textContent = 'Introdu numele!'; err.classList.remove('d-none'); return; }
+            try {
+                const ref = await addDoc(collection(db, 'Responsabili'), {
+                    nume, echipa: echipa, creatLa: serverTimestamp()
+                });
+                allResponsabili.push({ id: ref.id, nume, echipa: echipa });
+                toast(`${nume} a fost adăugat în echipă ✓`);
+                switchTab('dept');
+            } catch (e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
+        };
+
+        /* ── RENDER TABEL ── */
+        function renderTable() {
+            const search = (document.getElementById('f-search')?.value || '').toLowerCase();
+            const fSt = document.getElementById('f-status')?.value || '';
+            const fEch = document.getElementById('f-echipa')?.value || '';
+
+            let rows = allSesizari;
+            if (currentEchipa) rows = rows.filter(s => s.echipaAlocata === currentEchipa);
+            if (fEch) rows = rows.filter(s => s.echipaAlocata === fEch);
+            if (fSt) rows = rows.filter(s => s.status === fSt);
+            if (currentResponsabilId) rows = rows.filter(s => s.responsabilId === currentResponsabilId);
+            if (search) rows = rows.filter(s => (s.titlu || '').toLowerCase().includes(search) || (s.strada || '').toLowerCase().includes(search));
+
+            filteredSesizari = rows;
+            const tbody = document.getElementById('tabel-sesizari');
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">📭</div>Nicio sesizare în listă</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map(s => {
+                const prio = s.prioritate || 'normala';
+
+                // Generam selectia pentru persoana (lucrător)
+                const lucratoriEchipa = allResponsabili.filter(r => r.echipa === s.echipaAlocata);
+                let optionsLucratori = `<option value="">— Fără responsabil —</option>`;
+                allResponsabili.forEach(r => {
+                    optionsLucratori += `<option value="${r.id}" ${s.responsabilId === r.id ? 'selected' : ''}>${r.nume}</option>`;
+                });
+
+                return `<tr>
+            <td style="max-width:200px;">
+                <div style="font-weight:600;color:#e0e6f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.titlu || ''}">${s.titlu || '(fără titlu)'}</div>
+                ${s.strada ? `<div style="font-size:.7rem;color:rgba(255,255,255,.32);">📍 ${s.strada}</div>` : ''}
+            </td>
+            <td>${PRIO_BADGE[prio] || prio}</td>
+            <td>
+                <select class="tbl-select" style="border-color: rgba(96,165,250,0.3);" onchange="atribuieEchipa('${s.id}',this.value)">
+                    <option value="">— Nealocată —</option>
+                    <option value="echipa_interventie" ${s.echipaAlocata === 'echipa_interventie' ? 'selected' : ''}>⚡ Intervenție Rapidă</option>
+                    <option value="echipa_mentenanta" ${s.echipaAlocata === 'echipa_mentenanta' ? 'selected' : ''}>🔧 Mentenanță</option>
+                    <option value="echipa_inspectie" ${s.echipaAlocata === 'echipa_inspectie' ? 'selected' : ''}>👁️ Inspecție</option>
+                    <option value="echipa_altele" ${s.echipaAlocata === 'echipa_altele' ? 'selected' : ''}>👥 Altele</option>
+                </select>
+            </td>
+            <td>
+                <select class="tbl-select" onchange="atribuieLucrator('${s.id}',this.value)">
+                    ${optionsLucratori}
+                </select>
+            </td>
+            <td>
+                <select class="tbl-select" id="status-${s.id}">
+                    <option value="nou"      ${s.status === 'nou' ? 'selected' : ''}>🔵 Nou alocat</option>
+                    <option value="in_lucru" ${s.status === 'in_lucru' ? 'selected' : ''}>🟡 Pe Teren</option>
+                    <option value="rezolvat" ${s.status === 'rezolvat' ? 'selected' : ''}>✅ Soluționat</option>
+                </select>
+            </td>
+            <td>
+                <div style="display:flex;gap:4px;">
+                    <button class="act-btn save" onclick="salveazaStatus('${s.id}')">💾</button>
+                    <button class="act-btn" onclick="veziDetalii('${s.id}')">👁 Detalii</button>
+                </div>
+            </td>
+        </tr>`;
+            }).join('');
+        }
+
+        /* ── Atribuie Echipă și Lucrător ── */
+        window.atribuieEchipa = async function (sesId, echipaId) {
+            try {
+                await updateDoc(doc(db, 'Sesizari', sesId), {
+                    echipaAlocata: echipaId,
+                    status: 'in_lucru'
+                });
+                toast(`Sesizare trimisă la echipa selectată.`);
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        window.atribuieLucrator = async function (sesId, respId) {
+            try {
+                await updateDoc(doc(db, 'Sesizari', sesId), { responsabilId: respId });
+                toast(`Lucrător alocat cu succes.`);
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        window.salveazaStatus = async function (id) {
+            const val = document.getElementById('status-' + id)?.value;
+            if (!val) return;
+            try {
+                await updateDoc(doc(db, 'Sesizari', id), { status: val });
+                toast('Status lucrare actualizat ✓');
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        /* ── Detalii Modal ── */
+        let detaliiMap = null;
+        window.navigheazaSesizare = function (directie) {
+            const currentIndex = filteredSesizari.findIndex(s => s.id === currentSesizareId);
+            if (currentIndex !== -1) {
+                const newIndex = currentIndex + directie;
+                if (newIndex >= 0 && newIndex < filteredSesizari.length) veziDetalii(filteredSesizari[newIndex].id);
+            }
+        };
+
+        window.veziDetalii = function (id, arataModal = true) {
+            currentSesizareId = id;
+            const s = allSesizari.find(s => s.id === id);
+            if (!s) return;
+
+            const index = filteredSesizari.findIndex(x => x.id === id);
+            document.getElementById('btn-prev-ses').disabled = (index <= 0);
+            document.getElementById('btn-next-ses').disabled = (index === -1 || index >= filteredSesizari.length - 1);
+
+            const resp = allResponsabili.find(r => r.id === s.responsabilId);
+
+            document.getElementById('modal-detalii-body').innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="detail-field"><div class="detail-lbl">Titlu Lucrare</div><div class="detail-val" style="font-weight:700;">${s.titlu || '—'}</div></div>
+                <div class="detail-field"><div class="detail-lbl">Prioritate</div><div class="detail-val">${PRIO_BADGE[s.prioritate || 'normala']}</div></div>
+                ${s.strada ? `<div class="detail-field"><div class="detail-lbl">Adresă / Locație</div><div class="detail-val">📍 ${s.strada}</div></div>` : ''}
+                <div class="detail-field mt-3"><div class="detail-lbl">Lucrător Responsabil</div><div class="detail-val text-warning">${resp ? `👷‍♂️ ${resp.nume}` : '— Necunoscut —'}</div></div>
+                
+                <div class="detail-field mt-3" style="background: rgba(74,222,128,0.1); padding:10px; border-radius:8px; border: 1px solid rgba(74,222,128,0.2);">
+                    <label class="detail-lbl text-success mb-1">Notă de soluționare (Opțional):</label>
+                    <textarea id="nota-rezolutie" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Scrie raportul intervenției...">${s.rezolutieDepartament || ''}</textarea>
+                    <button class="btn btn-success btn-sm mt-2 w-100" onclick="salveazaRezolutie('${s.id}')">💾 Salvează Raport</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                ${s.descriere ? `<div class="detail-field"><div class="detail-lbl">Informații Cetățean</div><div class="detail-val" style="white-space:pre-wrap; opacity:0.8;">${s.descriere}</div></div>` : ''}
+                ${s.pozaURL ? `<div class="detail-field mt-3"><div class="detail-lbl">Fotografie Problemă</div><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" style="max-height:160px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,.1); margin-top:4px;"></a></div>` : ''}
+                ${s.latitudine && s.longitudine ? `<div class="detail-field mt-3"><div id="map-detalii" style="height:150px; width:100%; border-radius:8px; margin-top:8px; z-index:1;"></div></div>` : ''}
+            </div>
+        </div>`;
+
+            const myModalEl = document.getElementById('modalDetalii');
+            const myModal = bootstrap.Modal.getInstance(myModalEl) || new bootstrap.Modal(myModalEl);
+            if (arataModal) myModal.show();
+
+            setTimeout(() => {
+                if (s.latitudine && s.longitudine) {
+                    if (detaliiMap) detaliiMap.remove();
+                    detaliiMap = L.map('map-detalii', { zoomControl: false }).setView([s.latitudine, s.longitudine], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detaliiMap);
+                    L.marker([s.latitudine, s.longitudine]).addTo(detaliiMap);
+                }
+            }, 250);
+        };
+
+        window.salveazaRezolutie = async function (id) {
+            const txt = document.getElementById('nota-rezolutie').value;
+            try {
+                await updateDoc(doc(db, 'Sesizari', id), { rezolutieDepartament: txt, status: 'rezolvat' });
+                toast('Raportul a fost salvat și lucrarea marcată ca Rezolvată!');
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        /* ── Echipe & Responsabili Data ── */
+        async function loadResponsabili() {
+            try {
+                const snap = await getDocs(collection(db, 'Responsabili'));
+                allResponsabili = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderPanelResponsabili();
+            } catch (e) { console.warn(e.message); }
+        }
+
+        function renderPanelResponsabili() {
+            const panel = document.getElementById('panel-responsabili');
+            if (!panel) return;
+
+            const echipeList = [
+                { key: 'echipa_interventie', label: '⚡ Intervenție Rapidă' },
+                { key: 'echipa_mentenanta', label: '🔧 Mentenanță' },
+                { key: 'echipa_inspectie', label: '👁️ Inspecție / Constatare' },
+                { key: 'echipa_altele', label: '👥 Altele / Auxiliar' }
+            ];
+
+            let html = '';
+            echipeList.forEach(echipa => {
+                const color = ECHIPA_COLORS[echipa.key] || '#60a5fa';
+                const resps = allResponsabili.filter(r => r.echipa === echipa.key);
+
+                html += `<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;margin-bottom:8px;background:rgba(255,255,255,.03);">
+                    <div style="font-size:.82rem;font-weight:700;color:${color};margin-bottom:8px;">${echipa.label}</div>`;
+
+                if (!resps.length) {
+                    html += `<div style="font-size:.75rem;color:rgba(255,255,255,.25);font-style:italic;">— Fără membri adăugați</div>`;
+                } else {
+                    resps.forEach(r => {
+                        const init = r.nume.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+                        html += `<div class="resp-item" style="margin-bottom:6px;">
+                            <div class="resp-avatar" style="background:${color}18;color:${color};border:1px solid ${color}35;">${init}</div>
+                            <div class="resp-info"><div class="resp-name">${r.nume}</div></div>
+                            <button class="act-btn del" style="font-size:.65rem;padding:2px 7px;" onclick="stergeResponsabil('${r.id}')">✕</button>
+                        </div>`;
+                    });
+                }
+                html += `</div>`;
+            });
+
+            panel.innerHTML = html || '<div class="empty-state">Niciun membru adăugat.</div>';
+        }
+
+        window.stergeResponsabil = async function (id) {
+            if (!confirm('Ștergi acest lucrător din echipă?')) return;
+            try {
+                await deleteDoc(doc(db, 'Responsabili', id));
+                allResponsabili = allResponsabili.filter(r => r.id !== id);
+                toast('Lucrător șters');
+                renderPanelResponsabili(); renderTable();
+            } catch (e) { toast('Eroare: ' + e.message, false); }
+        };
+
+        window.salveazaResponsabil = async function () {
+            const nume = document.getElementById('r-nume').value.trim();
+            const echipa = document.getElementById('r-echipa').value;
+            const err = document.getElementById('r-eroare');
+            if (!nume) { err.textContent = 'Introdu numele!'; err.classList.remove('d-none'); return; }
+            err.classList.add('d-none');
+
+            try {
+                const ref = await addDoc(collection(db, 'Responsabili'), {
+                    nume, echipa: echipa, creatLa: serverTimestamp()
+                });
+                allResponsabili.push({ id: ref.id, nume, echipa: echipa });
+                document.getElementById('r-nume').value = '';
+                renderPanelResponsabili(); renderTable();
+                toast(`${nume} adăugat în echipă ✓`);
+                bootstrap.Modal.getInstance(document.getElementById('modalAdaugaResp'))?.hide();
+            } catch (e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
+        };
+    </script>
+</body>
+
+</html>

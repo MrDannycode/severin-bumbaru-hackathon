@@ -20,6 +20,9 @@ onAuthStateChanged(auth, async (user) => {
                 if (rol === 'SysAdmin') {
                     btnAdmin.href = 'sysadmin.html';
                     btnAdmin.textContent = '⚙️ SysAdmin Panel';
+                } else if (rol === 'DptAdmin') {
+                    btnAdmin.href = 'dptadmin.html';
+                    btnAdmin.textContent = '🏢 Panoul Meu';
                 } else {
                     btnAdmin.href = 'admin.html';
                     btnAdmin.textContent = '🛠️ Admin Panel';
@@ -390,7 +393,19 @@ if (btnIntraCont) {
         const r = await logare(email, parola);
         if (r.success) {
             msg('auth-mesaj','Logare reușită! 🎉','success');
-            setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide(), 1200);
+            // Redirecționăm în funcție de rol
+            const rol = await obtineRolUtilizator(r.user.uid);
+            setTimeout(() => {
+                if (rol === 'DptAdmin') {
+                    window.location.href = 'dptadmin.html';
+                } else if (rol === 'GstAdmin') {
+                    window.location.href = 'admin.html';
+                } else if (rol === 'SysAdmin') {
+                    window.location.href = 'sysadmin.html';
+                } else {
+                    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+                }
+            }, 1200);
         } else { 
             msg('auth-mesaj','Eroare: ' + r.message); 
         }

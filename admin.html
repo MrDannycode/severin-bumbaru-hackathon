@@ -64,6 +64,10 @@
                 onclick="new bootstrap.Modal(document.getElementById('modalAdaugaResp')).show();return false;">
                 <div class="sb-left"><span class="sb-icon">👥</span> Responsabili</div>
             </a>
+            <a class="sb-item" href="#"
+                onclick="new bootstrap.Modal(document.getElementById('modalAdaugaContDept')).show();return false;">
+                <div class="sb-left"><span class="sb-icon">🔐</span> Conturi Departamente</div>
+            </a>
         </aside>
 
         <main class="admin-main">
@@ -240,10 +244,11 @@
     <script type="module">
         import { auth, db } from './js/firebase.js';
         import { obtineRolUtilizator } from './js/auth.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { onAuthStateChanged, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             collection, query, orderBy, onSnapshot,
-            doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp
+            doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp, setDoc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         /* ── State ── */
@@ -730,7 +735,129 @@
             } catch (e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
             btn.disabled = false; btn.textContent = 'Salvează';
         };
+
+        /* ── Creare cont DptAdmin ── */
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAdvEbQAi1HBbPm7qlaN_06jyZVkM0DeC4",
+            authDomain: "galati-city-fix.firebaseapp.com",
+            projectId: "galati-city-fix",
+            storageBucket: "galati-city-fix.firebasestorage.app",
+            messagingSenderId: "279223709756",
+            appId: "1:279223709756:web:f0c4b4dc4b7beb0cfa1339"
+        };
+
+        window.creeazaContDepartament = async function() {
+            const dept  = document.getElementById('new-dept-id').value;
+            const nume  = document.getElementById('new-dept-nume').value.trim();
+            const email = document.getElementById('new-dept-email').value.trim();
+            const parola = document.getElementById('new-dept-parola').value;
+            const errDiv = document.getElementById('new-dept-eroare');
+            const btn    = document.getElementById('btn-creeaza-cont-dept');
+
+            errDiv.classList.add('d-none');
+
+            if (!nume || !email || !parola) {
+                errDiv.textContent = 'Toate câmpurile sunt obligatorii!';
+                errDiv.classList.remove('d-none'); return;
+            }
+            if (parola.length < 6) {
+                errDiv.textContent = 'Parola trebuie să aibă minim 6 caractere!';
+                errDiv.classList.remove('d-none'); return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Se creează contul...';
+
+            try {
+                // Instanță temporară — nu deloghează adminul curent
+                let tempApp;
+                try {
+                    tempApp = initializeApp(FIREBASE_CONFIG, 'TempDeptCreator');
+                } catch(e) {
+                    // Dacă instanța există deja (apel repetat), o refolosim
+                    tempApp = initializeApp(FIREBASE_CONFIG, 'TempDeptCreator');
+                }
+                const tempAuth = getAuth(tempApp);
+
+                // 1. Creare cont în Firebase Auth
+                const cred = await createUserWithEmailAndPassword(tempAuth, email, parola);
+                const nouUid = cred.user.uid;
+
+                // 2. Salvare profil + rol în Firestore (colecția "Users" – identică cu restul aplicației)
+                await setDoc(doc(db, 'Users', nouUid), {
+                    email: email,
+                    role: 'DptAdmin',
+                    numeSef: nume,
+                    departamentAsociat: dept,
+                    creatLa: serverTimestamp()
+                });
+
+                // 3. Delogăm instanța temporară (nu afectează sesiunea adminului)
+                await tempAuth.signOut();
+
+                toast(`Cont creat pentru ${nume} → ${dept} ✓`);
+
+                // Resetăm formularul
+                document.getElementById('new-dept-nume').value  = '';
+                document.getElementById('new-dept-email').value = '';
+                document.getElementById('new-dept-parola').value= '';
+                bootstrap.Modal.getInstance(document.getElementById('modalAdaugaContDept'))?.hide();
+
+            } catch(error) {
+                console.error('Eroare creare cont:', error);
+                errDiv.textContent = 'Eroare: ' + error.message;
+                errDiv.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔐 Creează Contul și Alocă Rolul';
+            }
+        };
     </script>
+
+    <!-- MODAL CREARE CONT DPTADMIN -->
+    <div class="modal fade" id="modalAdaugaContDept" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">🔐 Creează Cont DptAdmin</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:18px 22px;">
+                    <div class="mb-3">
+                        <label class="mlbl">Departament Asociat *</label>
+                        <select class="form-select mfc" id="new-dept-id">
+                            <option value="infrastructura">🕳️ Infrastructură</option>
+                            <option value="iluminat">💡 Iluminat Public</option>
+                            <option value="curatenie">♻️ Curățenie</option>
+                            <option value="parcuri">🌳 Spații Verzi</option>
+                            <option value="altele">⚙️ Altele</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="mlbl">Nume Șef Departament *</label>
+                        <input type="text" class="form-control mfc" id="new-dept-nume" placeholder="Ex: Popescu Ion">
+                    </div>
+                    <div class="mb-3">
+                        <label class="mlbl">Adresă Email *</label>
+                        <input type="email" class="form-control mfc" id="new-dept-email" placeholder="iluminat@cityfix.ro">
+                    </div>
+                    <div class="mb-3">
+                        <label class="mlbl">Parolă (min. 6 caractere) *</label>
+                        <input type="password" class="form-control mfc" id="new-dept-parola" placeholder="••••••">
+                    </div>
+                    <div id="new-dept-eroare" class="d-none mb-3"
+                        style="background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.27);border-radius:8px;padding:8px 12px;font-size:.83rem;color:#f87171;">
+                    </div>
+                    <button class="btn btn-warning w-100" id="btn-creeaza-cont-dept" onclick="creeazaContDepartament()">
+                        🔐 Creează Contul și Alocă Rolul
+                    </button>
+                    <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.3);text-align:center;">
+                        Contul va putea accesa <strong>dptadmin.html</strong> cu emailul și parola setate mai sus.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 
