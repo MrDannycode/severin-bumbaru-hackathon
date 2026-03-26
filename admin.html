@@ -15,7 +15,6 @@
 
 <body>
 
-    <!-- ╔══ NAVBAR ══╗ -->
     <nav class="admin-nav">
         <a class="nav-logo" href="index.html">⚓ <span>CityFix</span> Admin</a>
         <div class="nav-pills">
@@ -30,10 +29,8 @@
         </div>
     </nav>
 
-    <!-- ╔══ LAYOUT ══╗ -->
     <div class="admin-layout">
 
-        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-section">Departamente</div>
             <a class="sb-item active" href="#" onclick="filtrDept('',this);return false;" id="sb-all">
@@ -69,10 +66,8 @@
             </a>
         </aside>
 
-        <!-- MAIN -->
         <main class="admin-main">
 
-            <!-- KPI CARDS -->
             <div class="kpi-row">
                 <div class="kpi-card blue">
                     <div class="kpi-num" id="kpi-nou">—</div>
@@ -99,10 +94,8 @@
                 </div>
             </div>
 
-            <!-- CONTENT GRID -->
             <div class="content-grid">
 
-                <!-- TABEL -->
                 <div>
                     <div class="sec-hdr">
                         <div class="sec-title">
@@ -136,7 +129,8 @@
                             <option value="parcuri">🌳 Spații Verzi</option>
                             <option value="altele">⚙️ Altele</option>
                         </select>
-                        <button class="act-btn" style="height:32px; padding:0 12px; margin-left:auto;" onclick="reseteazaFiltre()">✖ Resetează</button>
+                        <button class="act-btn" style="height:32px; padding:0 12px; margin-left:auto;"
+                            onclick="reseteazaFiltre()">✖ Resetează</button>
                     </div>
 
                     <div class="admin-table-wrap">
@@ -164,13 +158,14 @@
                     </div>
                 </div>
 
-                <!-- PANEL RESPONSABILI -->
                 <div>
                     <div class="sec-hdr"></div>
                     <div class="panel-card">
                         <div class="panel-hdr" style="padding:0;gap:0;background:transparent;border-bottom:none;">
-                            <button id="tab-dept" onclick="switchTab('dept')" style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#1e3a5f;color:#60a5fa;border:none;border-radius:8px 0 0 8px;cursor:pointer;">DEPARTAMENTE</button>
-                            <button id="tab-add" onclick="switchTab('add')" style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#14263d;color:rgba(255,255,255,.4);border:none;border-radius:0 8px 8px 0;cursor:pointer;">ADAUGĂ</button>
+                            <button id="tab-dept" onclick="switchTab('dept')"
+                                style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#1e3a5f;color:#60a5fa;border:none;border-radius:8px 0 0 8px;cursor:pointer;">DEPARTAMENTE</button>
+                            <button id="tab-add" onclick="switchTab('add')"
+                                style="flex:1;padding:9px 0;font-size:.78rem;font-weight:700;letter-spacing:.04em;background:#14263d;color:rgba(255,255,255,.4);border:none;border-radius:0 8px 8px 0;cursor:pointer;">ADAUGĂ</button>
                         </div>
                         <div class="panel-body" id="panel-responsabili">
                             <div class="empty-state">
@@ -180,19 +175,22 @@
                     </div>
                 </div>
 
-            </div><!-- /content-grid -->
+            </div>
         </main>
-    </div><!-- /layout -->
-
-    <!-- TOAST -->
+    </div>
     <div id="toast-wrap"></div>
 
-    <!-- ═══ MODAL: Detalii Sesizare ═══ -->
     <div class="modal fade" id="modalDetalii" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h6 class="modal-title">📋 Detalii Sesizare</h6>
+                <div class="modal-header d-flex align-items-center">
+                    <h6 class="modal-title mb-0">📋 Detalii Sesizare</h6>
+                    <div class="ms-auto d-flex gap-2 me-3">
+                        <button class="btn btn-sm btn-outline-secondary text-white" id="btn-prev-ses"
+                            onclick="navigheazaSesizare(-1)">⬅ Înapoi</button>
+                        <button class="btn btn-sm btn-outline-secondary text-white" id="btn-next-ses"
+                            onclick="navigheazaSesizare(1)">Înainte ➡</button>
+                    </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" style="padding:20px 22px;" id="modal-detalii-body"></div>
@@ -200,7 +198,6 @@
         </div>
     </div>
 
-    <!-- ═══ MODAL: Adaugă Responsabil ═══ -->
     <div class="modal fade" id="modalAdaugaResp" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -237,7 +234,6 @@
         </div>
     </div>
 
-    <!-- ═══ SCRIPTS ═══ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -252,6 +248,8 @@
 
         /* ── State ── */
         let allSesizari = [];
+        let filteredSesizari = []; // Salvează lista curentă pentru navigare modal
+        let currentSesizareId = null; // Id-ul deschis în modal
         let allResponsabili = [];
         let currentDept = '';
         let currentResponsabilId = '';
@@ -307,10 +305,15 @@
                 updateKPI();
                 updateSidebarCounts();
                 renderTable();
-                renderPanelResponsabili(); // actualizăm workload-ul la fiecare schimbare
+                renderPanelResponsabili();
+
+                // Dacă modalul e deschis, re-randăm detaliile ca să prindem update-urile din DB
+                if (currentSesizareId) {
+                    // Update silențios la UI
+                    veziDetalii(currentSesizareId, false);
+                }
             }, (error) => {
                 console.error("Eroare la onSnapshot Sesizari:", error);
-                alert("Eroare Firebase: " + error.message);
                 document.getElementById('tabel-sesizari').innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">🚫</div>Eroare: ${error.message}</div></td></tr>`;
             });
         }
@@ -352,35 +355,35 @@
         /* ── Filtre ── */
         window.aplicaFiltre = function () { renderTable(); };
 
-        window.reseteazaFiltre = function() {
+        window.reseteazaFiltre = function () {
             document.getElementById('f-search').value = '';
             document.getElementById('f-status').value = '';
             document.getElementById('f-prioritate').value = '';
             document.getElementById('f-categorie').value = '';
             currentDept = '';
             currentResponsabilId = '';
-            document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
             document.getElementById('sb-all')?.classList.add('active');
             renderTable();
         };
 
-        window.filtreazaDupaResponsabil = function(id, nume) {
+        window.filtreazaDupaResponsabil = function (id, nume) {
             currentResponsabilId = id;
             toast(`Sesizări alocate lui ${nume} 🔍`);
             renderTable();
         };
 
-        window.switchTab = function(tab) {
+        window.switchTab = function (tab) {
             const btnDept = document.getElementById('tab-dept');
-            const btnAdd  = document.getElementById('tab-add');
-            const panel   = document.getElementById('panel-responsabili');
+            const btnAdd = document.getElementById('tab-add');
+            const panel = document.getElementById('panel-responsabili');
             if (tab === 'dept') {
                 btnDept.style.background = '#1e3a5f'; btnDept.style.color = '#60a5fa';
-                btnAdd.style.background  = '#14263d'; btnAdd.style.color  = 'rgba(255,255,255,.4)';
+                btnAdd.style.background = '#14263d'; btnAdd.style.color = 'rgba(255,255,255,.4)';
                 renderPanelResponsabili();
             } else {
                 btnDept.style.background = '#14263d'; btnDept.style.color = 'rgba(255,255,255,.4)';
-                btnAdd.style.background  = '#1e3a5f'; btnAdd.style.color  = '#60a5fa';
+                btnAdd.style.background = '#1e3a5f'; btnAdd.style.color = '#60a5fa';
                 panel.innerHTML = `
                     <div style="padding:14px 2px;">
                         <div class="mb-3">
@@ -390,7 +393,7 @@
                         <div class="mb-3">
                             <label style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:5px;display:block;">Departament *</label>
                             <select class="form-select mfc" id="r-dept-inline" style="font-size:.82rem;">
-                                <option value="infrastructura">🙳️ Infrastructură</option>
+                                <option value="infrastructura">🕳️ Infrastructură</option>
                                 <option value="iluminat">💡 Iluminat Public</option>
                                 <option value="curatenie">♻️ Curățenie</option>
                                 <option value="parcuri">🌳 Spații Verzi</option>
@@ -407,11 +410,11 @@
             }
         };
 
-        window.salveazaResponsabilInline = async function() {
+        window.salveazaResponsabilInline = async function () {
             const nume = document.getElementById('r-nume-inline')?.value.trim();
             const dept = document.getElementById('r-dept-inline')?.value;
-            const tel  = document.getElementById('r-tel-inline')?.value.trim();
-            const err  = document.getElementById('r-eroare-inline');
+            const tel = document.getElementById('r-tel-inline')?.value.trim();
+            const err = document.getElementById('r-eroare-inline');
             if (!nume) { err.textContent = 'Introdu numele!'; err.classList.remove('d-none'); return; }
             err.classList.add('d-none');
             try {
@@ -421,7 +424,7 @@
                 allResponsabili.push({ id: ref.id, nume, departament: dept, telefon: tel || '' });
                 toast(`${nume} adăugat ✓`);
                 switchTab('dept');
-            } catch(e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
+            } catch (e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
         };
 
         /* ── Render table ── */
@@ -442,6 +445,9 @@
                 (s.descriere || '').toLowerCase().includes(search) ||
                 (s.strada || '').toLowerCase().includes(search)
             );
+
+            // Salvăm lista filtrată curentă pentru a funcționa corect săgețile din modal
+            filteredSesizari = rows;
 
             const tbody = document.getElementById('tabel-sesizari');
             if (!rows.length) {
@@ -465,11 +471,11 @@
             <td>
                 <select class="tbl-select" id="dept-${s.id}" onchange="atribuieDepartament('${s.id}',this.value)">
                     <option value="">— Neatribuit —</option>
-                    <option value="infrastructura" ${(s.departamentAlocat||s.categorie)==='infrastructura'?'selected':''}>🙳️ Infrastructură</option>
-                    <option value="iluminat"       ${(s.departamentAlocat||s.categorie)==='iluminat'?'selected':''}>💡 Iluminat Public</option>
-                    <option value="curatenie"      ${(s.departamentAlocat||s.categorie)==='curatenie'?'selected':''}>♻️ Curățenie</option>
-                    <option value="parcuri"        ${(s.departamentAlocat||s.categorie)==='parcuri'?'selected':''}>🌳 Spații Verzi</option>
-                    <option value="altele"         ${(s.departamentAlocat||s.categorie)==='altele'?'selected':''}>⚙️ Altele</option>
+                    <option value="infrastructura" ${(s.departamentAlocat || s.categorie) === 'infrastructura' ? 'selected' : ''}>🕳️ Infrastructură</option>
+                    <option value="iluminat"       ${(s.departamentAlocat || s.categorie) === 'iluminat' ? 'selected' : ''}>💡 Iluminat Public</option>
+                    <option value="curatenie"      ${(s.departamentAlocat || s.categorie) === 'curatenie' ? 'selected' : ''}>♻️ Curățenie</option>
+                    <option value="parcuri"        ${(s.departamentAlocat || s.categorie) === 'parcuri' ? 'selected' : ''}>🌳 Spații Verzi</option>
+                    <option value="altele"         ${(s.departamentAlocat || s.categorie) === 'altele' ? 'selected' : ''}>⚙️ Altele</option>
                 </select>
             </td>
             <td>
@@ -491,39 +497,33 @@
             }).join('');
         }
 
-        /* ── Build responsabili options ── */
-        function buildRespOptions(categorie, selectedId) {
-            const same = allResponsabili.filter(r => r.departament === categorie);
-            const other = allResponsabili.filter(r => r.departament !== categorie);
-            return [...same, ...other].map(r =>
-                `<option value="${r.id}" ${r.id === selectedId ? 'selected' : ''}>${r.nume} (${CAT_LABEL[r.departament] || r.departament})</option>`
-            ).join('');
-        }
-
         /* ── Atribuie departament (redirect sesizare) ── */
         window.atribuieDepartament = async function (sesId, dept) {
             try {
                 await updateDoc(doc(db, 'Sesizari', sesId), {
                     departamentAlocat: dept,
-                    ...(dept ? { status: 'in_lucru' } : {})
+                    ...(dept && allSesizari.find(s => s.id === sesId)?.status === 'nou' ? { status: 'in_lucru' } : {})
                 });
                 toast(dept ? `Redirectionat la: ${CAT_LABEL[dept] || dept}` : 'Alocare eliminată');
             } catch (e) { toast('Eroare: ' + e.message, false); }
         };
 
-        /* ── Atribuie responsabil (persoana) ── */
-        window.atribuieResponsabil = async function (sesId, respId) {
+        /* ── Atribuie departament DIn interiorul MODALULUI ── */
+        window.alocaDepartamentModal = async function (sesId) {
+            const deptSelectat = document.getElementById('modal-select-dept').value;
+            if (!deptSelectat) {
+                toast("Te rugăm să selectezi un departament!", false);
+                return;
+            }
             try {
-                const resp = allResponsabili.find(r => r.id === respId);
-                const sesizare = allSesizari.find(s => s.id === sesId);
                 await updateDoc(doc(db, 'Sesizari', sesId), {
-                    responsabilId: respId,
-                    responsabilNume: resp?.nume || '',
-                    // Auto-trece la "în lucru" dacă era nou și se alocă un responsabil
-                    ...(sesizare?.status === 'nou' && respId ? { status: 'in_lucru' } : {})
+                    departamentAlocat: deptSelectat,
+                    status: 'in_lucru' // Trecem în lucru automat
                 });
-                toast(respId ? `Atribuit lui ${resp?.nume}` : 'Responsabil eliminat');
-            } catch (e) { toast('Eroare: ' + e.message, false); }
+                toast("Sesizarea a fost redirecționată cu succes! ✓");
+            } catch (error) {
+                toast("Eroare la alocare: " + error.message, false);
+            }
         };
 
         /* ── Salvare status ── */
@@ -536,12 +536,30 @@
             } catch (e) { toast('Eroare: ' + e.message, false); }
         };
 
+        /* ── Navigare modal (Săgeți) ── */
+        window.navigheazaSesizare = function (directie) {
+            const currentIndex = filteredSesizari.findIndex(s => s.id === currentSesizareId);
+            if (currentIndex !== -1) {
+                const newIndex = currentIndex + directie;
+                if (newIndex >= 0 && newIndex < filteredSesizari.length) {
+                    veziDetalii(filteredSesizari[newIndex].id);
+                }
+            }
+        };
+
         /* ── Detalii ── */
         let detaliiMap = null;
 
-        window.veziDetalii = function (id) {
+        window.veziDetalii = function (id, arataModal = true) {
+            currentSesizareId = id;
             const s = allSesizari.find(s => s.id === id);
             if (!s) return;
+
+            // Actualizare stare butoane navigare (dezactivează dacă suntem la capăt de listă)
+            const index = filteredSesizari.findIndex(x => x.id === id);
+            document.getElementById('btn-prev-ses').disabled = (index <= 0);
+            document.getElementById('btn-next-ses').disabled = (index === -1 || index >= filteredSesizari.length - 1);
+
             const data = s.creatLa ? new Date(s.creatLa.seconds * 1000).toLocaleString('ro-RO') : '—';
             const resp = allResponsabili.find(r => r.id === s.responsabilId);
 
@@ -558,18 +576,35 @@
             </div>
             <div class="col-md-6">
                 ${s.descriere ? `<div class="detail-field"><div class="detail-lbl">Descriere</div><div class="detail-val" style="white-space:pre-wrap;">${s.descriere}</div></div>` : ''}
-                ${s.pozaURL ? `<div class="detail-field"><div class="detail-lbl">Fotografie atașată</div><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" style="max-height:180px; max-width:100%; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.1); margin-top:4px; transition: transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"></a></div>` : ''}
-                ${s.latitudine && s.longitudine ? `<div class="detail-field"><div class="detail-lbl">Coordonate GPS</div><div class="detail-val">📍 ${s.latitudine.toFixed(5)}, ${s.longitudine.toFixed(5)}<br><a href="https://maps.google.com/?q=${s.latitudine},${s.longitudine}" target="_blank" style="font-size:.78rem;color:#60a5fa;">Deschide în Google Maps ↗</a></div><div id="map-detalii" style="height:150px; width:100%; border-radius:8px; margin-top:8px; border:1px solid rgba(255,255,255,0.1); z-index:1;"></div></div>` : ''}
+                
+                <div class="detail-field mt-3" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <label class="detail-lbl text-warning mb-2" style="font-weight:600;">Redirecționează către Departament:</label>
+                    <select id="modal-select-dept" class="form-select bg-dark text-white border-secondary mb-2" style="font-size:0.85rem;">
+                        <option value="">Alege departamentul...</option>
+                        <option value="infrastructura" ${(s.departamentAlocat || s.categorie) === 'infrastructura' ? 'selected' : ''}>🕳️ Infrastructură</option>
+                        <option value="iluminat" ${(s.departamentAlocat || s.categorie) === 'iluminat' ? 'selected' : ''}>💡 Iluminat Public</option>
+                        <option value="curatenie" ${(s.departamentAlocat || s.categorie) === 'curatenie' ? 'selected' : ''}>♻️ Curățenie</option>
+                        <option value="parcuri" ${(s.departamentAlocat || s.categorie) === 'parcuri' ? 'selected' : ''}>🌳 Spații Verzi</option>
+                        <option value="altele" ${(s.departamentAlocat || s.categorie) === 'altele' ? 'selected' : ''}>⚙️ Altele</option>
+                    </select>
+                    <button class="btn btn-warning btn-sm w-100" onclick="alocaDepartamentModal('${s.id}')">💾 Actualizează Departamentul</button>
+                </div>
+
+                ${s.pozaURL ? `<div class="detail-field mt-3"><div class="detail-lbl">Fotografie atașată</div><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" style="max-height:180px; max-width:100%; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.1); margin-top:4px; transition: transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"></a></div>` : ''}
+                ${s.latitudine && s.longitudine ? `<div class="detail-field mt-3"><div class="detail-lbl">Coordonate GPS</div><div class="detail-val">📍 ${s.latitudine.toFixed(5)}, ${s.longitudine.toFixed(5)}<br><a href="https://maps.google.com/?q=${s.latitudine},${s.longitudine}" target="_blank" style="font-size:.78rem;color:#60a5fa;">Deschide în Google Maps ↗</a></div><div id="map-detalii" style="height:150px; width:100%; border-radius:8px; margin-top:8px; border:1px solid rgba(255,255,255,0.1); z-index:1;"></div></div>` : ''}
                 <div class="detail-field" style="margin-top:10px;"><div class="detail-lbl">Creat de</div><div class="detail-val" style="font-size:.72rem;opacity:.4;">${s.creatDe || 'anonim'}</div></div>
             </div>
         </div>`;
 
             const myModalEl = document.getElementById('modalDetalii');
-            const myModal = new bootstrap.Modal(myModalEl);
-            myModal.show();
+            const myModal = bootstrap.Modal.getInstance(myModalEl) || new bootstrap.Modal(myModalEl);
 
-            myModalEl.addEventListener('shown.bs.modal', function initMap() {
-                myModalEl.removeEventListener('shown.bs.modal', initMap);
+            if (arataModal) {
+                myModal.show();
+            }
+
+            // Inițializăm harta dacă e cazul, cu o mică întârziere să fim siguri că modalul a randat DOM-ul
+            setTimeout(() => {
                 if (s.latitudine && s.longitudine) {
                     if (detaliiMap) {
                         detaliiMap.remove();
@@ -578,6 +613,12 @@
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detaliiMap);
                     L.marker([s.latitudine, s.longitudine]).addTo(detaliiMap);
                 }
+            }, 250);
+
+            // Când modalul se închide complet, ștergem ID-ul reținut
+            myModalEl.addEventListener('hidden.bs.modal', function onHide() {
+                currentSesizareId = null;
+                myModalEl.removeEventListener('hidden.bs.modal', onHide);
             });
         };
 
@@ -605,24 +646,18 @@
             if (!panel) return;
 
             const depts = [
-                { key: 'infrastructura', label: '🙳️ Infrastructură' },
-                { key: 'iluminat',       label: '💡 Iluminat Public' },
-                { key: 'curatenie',      label: '♻️ Curățenie' },
-                { key: 'parcuri',        label: '🌳 Spații Verzi' },
-                { key: 'altele',         label: '⚙️ Altele' }
+                { key: 'infrastructura', label: '🕳️ Infrastructură' },
+                { key: 'iluminat', label: '💡 Iluminat Public' },
+                { key: 'curatenie', label: '♻️ Curățenie' },
+                { key: 'parcuri', label: '🌳 Spații Verzi' },
+                { key: 'altele', label: '⚙️ Altele' }
             ];
-
-            const DEPT_COLORS = {
-                infrastructura: '#f59e0b', iluminat: '#60a5fa',
-                curatenie: '#4ade80', parcuri: '#86efac', altele: '#a78bfa'
-            };
 
             let html = '';
             depts.forEach(dept => {
                 const color = DEPT_COLORS[dept.key] || '#60a5fa';
                 const resps = allResponsabili.filter(r => r.departament === dept.key);
                 const sesCount = allSesizari.filter(s => s.categorie === dept.key).length;
-                const alocate = allSesizari.filter(s => s.categorie === dept.key && s.responsabilId).length;
 
                 html += `<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:rgba(255,255,255,.03);">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -635,13 +670,13 @@
                 } else {
                     resps.forEach(r => {
                         const activeR = allSesizari.filter(s => s.responsabilId === r.id && s.status === 'in_lucru').length;
-                        const totalR  = allSesizari.filter(s => s.responsabilId === r.id).length;
-                        const init = r.nume.split(' ').map(w => w[0]||'').join('').toUpperCase().slice(0,2);
-                        const pct  = totalR ? Math.min(Math.round(activeR/totalR*100),100) : 0;
+                        const totalR = allSesizari.filter(s => s.responsabilId === r.id).length;
+                        const init = r.nume.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+                        const pct = totalR ? Math.min(Math.round(activeR / totalR * 100), 100) : 0;
                         html += `<div class="resp-item" style="margin-bottom:6px;">
                             <div class="resp-avatar" style="background:${color}18;color:${color};border:1px solid ${color}35;">${init}</div>
                             <div class="resp-info">
-                                <div class="resp-name">${r.nume}${ r.telefon ? ` <span style="font-size:.67rem;opacity:.4;">— ${r.telefon}</span>` : '' }</div>
+                                <div class="resp-name">${r.nume}${r.telefon ? ` <span style="font-size:.67rem;opacity:.4;">— ${r.telefon}</span>` : ''}</div>
                                 <div class="resp-stats">${activeR} active · ${totalR} total</div>
                                 <div class="resp-bar-wrap"><div class="resp-bar" style="width:${pct}%;background:${color};"></div></div>
                             </div>
