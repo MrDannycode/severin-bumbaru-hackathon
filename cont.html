@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contul Meu – CityFix Galați</title>
+    <meta name="description" content="Autentifică-te sau creează un cont pentru a raporta probleme urbane în Galați.">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cont.css">
+</head>
+
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar-custom">
+    <div class="container d-flex align-items-center justify-content-between">
+        <a class="d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+            <span style="font-size:1.5rem;">⚓</span>
+            <span class="navbar-brand-text">CityFix Galați</span>
+        </a>
+        <div class="d-flex align-items-center gap-1">
+            <a href="index.html" class="nav-link-custom">Acasă</a>
+            <a href="#" class="nav-link-custom">Istoric</a>
+            <a href="#" class="nav-link-custom">Hartă</a>
+            <a href="admin.html" class="nav-link-custom d-none" id="btnAdmin" style="color:#f0c040 !important;">Admin</a>
+            <button class="btn-nav-login ms-2" id="btnLogin">⚙ Cont</button>
+        </div>
+    </div>
+</nav>
+
+<div class="cont-wrapper">
+
+    <!-- ══════════════════════════════════
+         SECȚIUNEA DE AUTENTIFICARE
+         Afișată când utilizatorul nu e logat
+    ══════════════════════════════════ -->
+    <div id="sectiune-auth" class="auth-container">
+
+        <!-- Tabs Login / Register -->
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="auth-logo-icon">⚓</span>
+                <div class="auth-logo-text">CityFix Galați</div>
+                <div class="auth-logo-sub">Platforma cetățenilor</div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs" id="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Intră în cont</button>
+                <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Cont nou</button>
+            </div>
+
+            <!-- FORM LOGIN -->
+            <div id="panel-login" class="auth-panel active">
+                <div class="auth-field">
+                    <label class="auth-lbl">📧 Email</label>
+                    <input type="email" class="auth-input" id="l-email" placeholder="nume@exemplu.com" autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <label class="auth-lbl">🔑 Parolă</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" class="auth-input" id="l-parola" placeholder="Parola ta" autocomplete="current-password">
+                        <button class="btn-eye" type="button" onclick="togglePassword('l-parola', this)">👁</button>
+                    </div>
+                </div>
+                <div id="l-mesaj" class="auth-msg d-none"></div>
+                <button class="btn-auth-primary" id="btn-login" onclick="doLogin()">
+                    <span id="btn-login-text">Intră în cont →</span>
+                </button>
+                <div class="auth-divider">sau</div>
+                <button class="btn-auth-secondary" onclick="switchTab('register')">Creează un cont nou</button>
+            </div>
+
+            <!-- FORM REGISTER -->
+            <div id="panel-register" class="auth-panel">
+                <div class="auth-field">
+                    <label class="auth-lbl">📧 Email</label>
+                    <input type="email" class="auth-input" id="r-email" placeholder="nume@exemplu.com" autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <label class="auth-lbl">🔑 Parolă</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" class="auth-input" id="r-parola" placeholder="Minim 6 caractere" autocomplete="new-password">
+                        <button class="btn-eye" type="button" onclick="togglePassword('r-parola', this)">👁</button>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-lbl">🔁 Confirmă parola</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" class="auth-input" id="r-confirm" placeholder="Repetă parola" autocomplete="new-password">
+                        <button class="btn-eye" type="button" onclick="togglePassword('r-confirm', this)">👁</button>
+                    </div>
+                </div>
+                <!-- Password strength -->
+                <div id="strength-bar-wrap" class="strength-wrap">
+                    <div class="strength-bar" id="strength-bar"></div>
+                </div>
+                <div id="strength-label" class="strength-label"></div>
+
+                <div id="r-mesaj" class="auth-msg d-none"></div>
+                <button class="btn-auth-primary" id="btn-register" onclick="doRegister()">
+                    <span id="btn-register-text">Creează cont →</span>
+                </button>
+                <div class="auth-divider">ai deja un cont?</div>
+                <button class="btn-auth-secondary" onclick="switchTab('login')">Înapoi la autentificare</button>
+            </div>
+
+        </div><!-- /auth-card -->
+
+        <!-- Info pills -->
+        <div class="auth-pills">
+            <div class="auth-pill">🔒 Date securizate</div>
+            <div class="auth-pill">🏙️ Sesizări în timp real</div>
+            <div class="auth-pill">📍 Localizare GPS</div>
+        </div>
+
+    </div><!-- /sectiune-auth -->
+
+
+    <!-- ══════════════════════════════════
+         DASHBOARD CETĂȚEAN
+         Afișat când utilizatorul e logat
+    ══════════════════════════════════ -->
+    <div id="sectiune-dashboard" class="dashboard-container d-none">
+
+        <!-- Profil header -->
+        <div class="dash-profile-card">
+            <div class="dash-avatar" id="dash-avatar">👤</div>
+            <div class="dash-profile-info">
+                <div class="dash-name" id="dash-email">—</div>
+                <div class="dash-role-badge" id="dash-role-badge">
+                    <span>🏷️</span>
+                    <span id="dash-role-text">Cetățean</span>
+                </div>
+                <div class="dash-since" id="dash-since">Cont activ</div>
+            </div>
+            <button class="btn-dash-logout" id="btn-logout" onclick="doLogout()">
+                🚪 Delogare
+            </button>
+        </div>
+
+        <!-- Stats rapide -->
+        <div class="dash-stats-row">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">📋</div>
+                <div class="dash-stat-val" id="stat-total">—</div>
+                <div class="dash-stat-lbl">Sesizări trimise</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">✅</div>
+                <div class="dash-stat-val" id="stat-rezolvate">—</div>
+                <div class="dash-stat-lbl">Rezolvate</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">🔧</div>
+                <div class="dash-stat-val" id="stat-in-lucru">—</div>
+                <div class="dash-stat-lbl">În lucru</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">🔴</div>
+                <div class="dash-stat-val" id="stat-noi">—</div>
+                <div class="dash-stat-lbl">În așteptare</div>
+            </div>
+        </div>
+
+        <!-- Acțiuni rapide -->
+        <div class="dash-actions">
+            <a href="index.html" class="dash-action-btn primary">
+                <span>📋</span>
+                <div>
+                    <div class="dash-action-title">Adaugă Sesizare</div>
+                    <div class="dash-action-sub">Raportează o problemă rapidă</div>
+                </div>
+            </a>
+            <a href="adauga.html" class="dash-action-btn secondary">
+                <span>✏️</span>
+                <div>
+                    <div class="dash-action-title">Sesizare Detaliată</div>
+                    <div class="dash-action-sub">Formular complet cu poze</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Sesizările mele -->
+        <div class="dash-section">
+            <div class="dash-section-hdr">
+                <span>📋 Sesizările mele</span>
+                <span class="dash-section-count" id="count-sesizari">0</span>
+            </div>
+            <div id="my-sesizari-list">
+                <div class="dash-loading">
+                    <div class="spinner-border spinner-border-sm" style="color:#4da6ff;" role="status"></div>
+                    <span>Se încarcă sesizările...</span>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /sectiune-dashboard -->
+
+</div><!-- /cont-wrapper -->
+
+<!-- ════ SCRIPTS ════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="js/cont.js"></script>
+
+</body>
+</html>

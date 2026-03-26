@@ -5,32 +5,18 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// Actualizează UI-ul navbar în funcție de starea autentificării și rolul utilizatorului
+// Actualizează UI-ul navbar (butonul Admin) în funcție de starea autentificării
+// Autentificarea cetățenilor este gestionată de cont.html
 onAuthStateChanged(auth, async (user) => {
-    const btnLogin = document.getElementById('btnLogin');
     const btnAdmin = document.getElementById('btnAdmin');
 
     if (user) {
-        // Obținem rolul utilizatorului din Firestore
         const rol = await obtineRolUtilizator(user.uid);
 
-        // Actualizăm butonul de Login → Delogare
-        if (btnLogin) {
-            btnLogin.textContent = `Delogare (${user.email})`;
-            btnLogin.removeAttribute('data-bs-toggle');
-            btnLogin.removeAttribute('data-bs-target');
-            btnLogin.onclick = async () => {
-                await signOut(auth);
-            };
-        }
-
-        // Afișăm butonul Admin doar pentru cei 3 tipuri de administratori
         if (btnAdmin) {
             const adminRoles = ['SysAdmin', 'GstAdmin', 'DptAdmin'];
             if (adminRoles.includes(rol)) {
                 btnAdmin.classList.remove('d-none');
-                // SysAdmin → pagina de gestionare departamente
-                // GstAdmin și DptAdmin → panoul admin sesizări
                 if (rol === 'SysAdmin') {
                     btnAdmin.href = 'sysadmin.html';
                     btnAdmin.textContent = '⚙️ SysAdmin Panel';
@@ -44,18 +30,7 @@ onAuthStateChanged(auth, async (user) => {
         }
 
     } else {
-        // Niciun utilizator logat — resetăm butonul Login
-        if (btnLogin) {
-            btnLogin.textContent = 'Login';
-            btnLogin.setAttribute('data-bs-toggle', 'modal');
-            btnLogin.setAttribute('data-bs-target', '#loginModal');
-            btnLogin.onclick = null;
-        }
-
-        // Ascundem Admin și dacă nu e nimeni logat
-        if (btnAdmin) {
-            btnAdmin.classList.add('d-none');
-        }
+        if (btnAdmin) btnAdmin.classList.add('d-none');
     }
 });
 
