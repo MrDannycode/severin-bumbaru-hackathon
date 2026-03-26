@@ -906,7 +906,7 @@
                     pozaURL       = await getDownloadURL(snap.ref);
                 } catch (imgErr) {
                     console.error("Eroare upload imagine:", imgErr);
-                    throw new Error("Eroare la încărcarea imaginii. Verifică conexiunea sau alege altă poză.");
+                    throw new Error("Eroare Firebase Storage: " + (imgErr.message || JSON.stringify(imgErr)));
                 }
             }
 
