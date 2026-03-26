@@ -22,9 +22,10 @@ onAuthStateChanged(auth, async (user) => {
             };
         }
 
-        // Ascundem butonul Admin dacă utilizatorul este "citizen"
+        // Afișăm butonul Admin pentru oricare din cele 3 roluri de administrator
+        const ADMIN_ROLES = ['SysAdmin', 'GstAdmin', 'DptAdmin'];
         if (btnAdmin) {
-            if (rol === 'admin') {
+            if (ADMIN_ROLES.includes(rol)) {
                 btnAdmin.classList.remove('d-none');
             } else {
                 btnAdmin.classList.add('d-none');

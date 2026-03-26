@@ -74,7 +74,7 @@ export async function obtineRolUtilizator(uid) {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            return docSnap.data().role; // Va returna "citizen" sau "admin"
+            return docSnap.data().role; // Va returna "citizen", "SysAdmin", "GstAdmin" sau "DptAdmin"
         } else {
             return "citizen"; // Fallback de siguranță
         }

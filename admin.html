@@ -227,7 +227,7 @@
         <span class="nav-pill pill-urg"   id="np-urg">🔴 — Urgente</span>
     </div>
     <div class="nav-right">
-        <span class="admin-badge">👤 Administrator</span>
+        <span class="admin-badge" id="role-badge">👤 Administrator</span>
         <a href="index.html" class="btn-nav-sm">← Înapoi</a>
     </div>
 </nav>
@@ -473,12 +473,32 @@ function toast(msg, ok=true) {
 }
 
 /* ── Auth guard ── */
+/* ── Configurare roluri ── */
+const ADMIN_ROLES = ['SysAdmin', 'GstAdmin', 'DptAdmin'];
+const ROLE_LABEL = {
+    SysAdmin: '🛡️ SysAdmin',
+    GstAdmin: '👤 GstAdmin',
+    DptAdmin: '🏢 DptAdmin'
+};
+const ROLE_COLOR = {
+    SysAdmin: '#f87171',   // roșu
+    GstAdmin: '#f0c040',   // galben (culoarea originală)
+    DptAdmin: '#60a5fa'    // albastru
+};
+
 onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href='index.html'; return; }
     const rol = await obtineRolUtilizator(user.uid);
-    if (rol !== 'admin') {
+    if (!ADMIN_ROLES.includes(rol)) {
         alert('Acces interzis! Doar administratorii pot accesa această pagină.');
         window.location.href = 'index.html'; return;
+    }
+    // Actualizăm badge-ul cu rolul specific
+    const badge = document.getElementById('role-badge');
+    if (badge) {
+        badge.textContent = ROLE_LABEL[rol] || rol;
+        badge.style.color = ROLE_COLOR[rol] || '#f0c040';
+        badge.style.background = (ROLE_COLOR[rol] || '#f0c040') + '26'; // 26 hex = ~15% opacity
     }
     initAdmin();
 });
