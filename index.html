@@ -529,8 +529,8 @@
                     <div class="mb-3">
                         <label class="form-lbl">Fotografie (opțional)</label>
                         <label class="photo-label" for="sr-poza">
-                            📷 Adaugă o fotografie
-                            <input type="file" id="sr-poza" accept="image/*" class="d-none">
+                            📷 Fă o poză sau alege din galerie
+                            <input type="file" id="sr-poza" accept="image/*" capture="environment" class="d-none">
                         </label>
                         <div id="sr-preview-container" class="d-none mt-2">
                             <img id="sr-poza-preview" src="" alt="Preview"
@@ -828,18 +828,52 @@
         btn.classList.toggle('open');
     };
 
-    /* ── Preview poză ── */
+    /* ── Autocompresie Imagine pe Client ── */
+    function compressImage(file, maxSize, callback) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+                } else {
+                    if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                        type: "image/jpeg", lastModified: Date.now()
+                    });
+                    callback(newFile, canvas.toDataURL('image/jpeg', 0.8));
+                }, 'image/jpeg', 0.8);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ── Preview poză + Compresie la selectare ── */
     document.getElementById('sr-poza').addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
-        srFisier = file;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            document.getElementById('sr-poza-preview').src = ev.target.result;
-            document.getElementById('sr-preview-container').classList.remove('d-none');
-        };
-        reader.readAsDataURL(file);
+        
+        // Afișăm un feedback vizual
+        document.getElementById('sr-poza-preview').src = '';
+        document.getElementById('sr-preview-container').classList.remove('d-none');
+        document.getElementById('btn-sr-submit').disabled = true;
+        
+        compressImage(file, 900, (compressedFile, dataUrl) => {
+            srFisier = compressedFile;
+            document.getElementById('sr-poza-preview').src = dataUrl;
+            document.getElementById('btn-sr-submit').disabled = false;
+        });
     });
+    
     document.getElementById('sr-btn-sterge').addEventListener('click', () => {
         srFisier = null;
         document.getElementById('sr-poza').value = '';
@@ -865,11 +899,18 @@
             // Upload poză opțional
             let pozaURL = null;
             if (srFisier) {
-                const storRef = ref(storage, `sesizari/${Date.now()}_${srFisier.name}`);
-                const snap    = await uploadBytes(storRef, srFisier);
-                pozaURL       = await getDownloadURL(snap.ref);
+                btn.textContent = '⏳ Se încarcă fotografia...';
+                try {
+                    const storRef = ref(storage, `sesizari/${Date.now()}_${srFisier.name.replace(/[^a-zA-Z0-9.]/g, '')}`);
+                    const snap    = await uploadBytes(storRef, srFisier);
+                    pozaURL       = await getDownloadURL(snap.ref);
+                } catch (imgErr) {
+                    console.error("Eroare upload imagine:", imgErr);
+                    throw new Error("Eroare la încărcarea imaginii. Verifică conexiunea sau alege altă poză.");
+                }
             }
 
+            btn.textContent = '⏳ Se salvează datele...';
             const titlu    = document.getElementById('sr-titlu').value.trim();
             const descriere = document.getElementById('sr-descriere').value.trim();
             const prioritate = document.getElementById('sr-prioritate').value;
@@ -896,7 +937,7 @@
 
         } catch (err) {
             console.error(err);
-            eroare.textContent = '❌ Eroare: ' + err.message;
+            eroare.textContent = '❌ ' + err.message;
             eroare.classList.remove('d-none');
             btn.disabled = false;
             btn.textContent = '🚀 Trimite Sesizarea la Administrator';
