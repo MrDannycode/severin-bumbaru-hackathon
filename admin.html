@@ -858,6 +858,15 @@
                             <option value="urgenta">🟠 Urgentă</option>
                             <option value="normala">Normală</option>
                         </select>
+                        <select class="filter-select" id="f-categorie" onchange="aplicaFiltre()">
+                            <option value="">Toate categoriile</option>
+                            <option value="infrastructura">🕳️ Infrastructură</option>
+                            <option value="iluminat">💡 Iluminat Public</option>
+                            <option value="curatenie">♻️ Curățenie</option>
+                            <option value="parcuri">🌳 Spații Verzi</option>
+                            <option value="altele">⚙️ Altele</option>
+                        </select>
+                        <button class="act-btn" style="height:32px; padding:0 12px; margin-left:auto;" onclick="reseteazaFiltre()">✖ Resetează</button>
                     </div>
 
                     <div class="admin-table-wrap">
@@ -1020,8 +1029,13 @@
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.href = 'index.html'; return; }
             const rol = await obtineRolUtilizator(user.uid);
+<<<<<<< HEAD
             if (rol !== 'GstAdmin') {
                 alert('Acces interzis! Doar GstAdmin poate accesa această pagină.');
+=======
+            if (rol !== 'admin') {
+                alert('Acces interzis! Doar administratorii pot accesa această pagină.');
+>>>>>>> c4e486a3b7f631f9ebf6cceec32e14e342277b03
                 window.location.href = 'index.html'; return;
             }
             initAdmin();
@@ -1077,6 +1091,7 @@
         /* ── Filtre ── */
         window.aplicaFiltre = function () { renderTable(); };
 
+<<<<<<< HEAD
         /* ── Render table ── */
         function renderTable() {
             const search = (document.getElementById('f-search')?.value || '').toLowerCase();
@@ -1099,6 +1114,43 @@
                 return;
             }
 
+=======
+        window.reseteazaFiltre = function() {
+            document.getElementById('f-search').value = '';
+            document.getElementById('f-status').value = '';
+            document.getElementById('f-prioritate').value = '';
+            document.getElementById('f-categorie').value = '';
+            currentDept = '';
+            document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+            document.getElementById('sb-all')?.classList.add('active');
+            renderTable();
+        };
+
+        /* ── Render table ── */
+        function renderTable() {
+            const search = (document.getElementById('f-search')?.value || '').toLowerCase();
+            const fSt = document.getElementById('f-status')?.value || '';
+            const fPr = document.getElementById('f-prioritate')?.value || '';
+            const fCat = document.getElementById('f-categorie')?.value || '';
+
+            let rows = allSesizari;
+            if (currentDept) rows = rows.filter(s => s.categorie === currentDept);
+            if (fCat) rows = rows.filter(s => s.categorie === fCat);
+            if (fSt) rows = rows.filter(s => s.status === fSt);
+            if (fPr) rows = rows.filter(s => s.prioritate === fPr);
+            if (search) rows = rows.filter(s =>
+                (s.titlu || '').toLowerCase().includes(search) ||
+                (s.descriere || '').toLowerCase().includes(search) ||
+                (s.strada || '').toLowerCase().includes(search)
+            );
+
+            const tbody = document.getElementById('tabel-sesizari');
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">📭</div>Nicio sesizare găsită</div></td></tr>';
+                return;
+            }
+
+>>>>>>> c4e486a3b7f631f9ebf6cceec32e14e342277b03
             tbody.innerHTML = rows.map(s => {
                 const data = s.creatLa
                     ? new Date(s.creatLa.seconds * 1000).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
