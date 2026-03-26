@@ -112,6 +112,7 @@
                             <strong>${s.titlu || '-'}</strong><br>
                             <small class="text-muted">${data}</small><br>
                             <small class="text-muted fst-italic">${s.descriere || ''}</small>
+                            ${s.pozaURL ? `<br><a href="${s.pozaURL}" target="_blank"><img src="${s.pozaURL}" alt="Foto" style="max-height:60px; max-width:80px; border-radius:4px; margin-top:4px; object-fit:cover;"></a>` : ''}
                         </td>
                         <td><span class="badge bg-secondary">${categorieLabel[s.categorie] || s.categorie}</span></td>
                         <td>${statusLabel[s.status] || s.status}</td>

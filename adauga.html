@@ -63,6 +63,24 @@
                                         placeholder="Oferă mai multe detalii despre problemă..." required></textarea>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label">Fotoș (opțional)</label>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <label class="btn btn-outline-primary flex-fill mb-0" for="poza-upload">
+                                            📂 Încarcă poză
+                                            <input type="file" id="poza-upload" accept="image/*" class="d-none">
+                                        </label>
+                                        <label class="btn btn-outline-success flex-fill mb-0" for="poza-camera">
+                                            📷 Fați o poză
+                                            <input type="file" id="poza-camera" accept="image/*" capture="environment" class="d-none">
+                                        </label>
+                                    </div>
+                                    <div id="preview-container" class="d-none">
+                                        <img id="poza-preview" src="" alt="Preview" class="img-fluid rounded border" style="max-height: 200px;">
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-1" id="btn-sterge-poza">✕ Șterge poza</button>
+                                    </div>
+                                </div>
+
                                 <button type="button" class="btn btn-secondary w-100" id="btn-mergi-la-harta">Următorul
                                     pas: Alege Locația 🗺️</button>
                             </div>
@@ -155,9 +173,35 @@
 
     <!-- Salvare sesizare în Firestore -->
     <script type="module">
-        import { db, auth } from './js/firebase.js';
+        import { db, auth, storage } from './js/firebase.js';
         import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+        // Preview poză — funcționează pentru ambele inputuri
+        let fisierSelectat = null;
+
+        function handleFileSelect(file) {
+            if (!file) return;
+            fisierSelectat = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('poza-preview').src = e.target.result;
+                document.getElementById('preview-container').classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('poza-upload').addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+        document.getElementById('poza-camera').addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+
+        document.getElementById('btn-sterge-poza').addEventListener('click', () => {
+            fisierSelectat = null;
+            document.getElementById('poza-upload').value = '';
+            document.getElementById('poza-camera').value = '';
+            document.getElementById('preview-container').classList.add('d-none');
+        });
+
+        // Submit formular
         document.getElementById('form-sesizare').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -172,7 +216,19 @@
                 return;
             }
 
+            const btnSubmit = document.querySelector('button[type="submit"]');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Se trimite...';
+
             try {
+                // Upload poză dacă există
+                let pozaURL = null;
+                if (fisierSelectat) {
+                    const storageRef = ref(storage, `sesizari/${Date.now()}_${fisierSelectat.name}`);
+                    const snapshot = await uploadBytes(storageRef, fisierSelectat);
+                    pozaURL = await getDownloadURL(snapshot.ref);
+                }
+
                 await addDoc(collection(db, 'Sesizari'), {
                     titlu: titlu,
                     categorie: categorie,
@@ -180,15 +236,20 @@
                     latitudine: parseFloat(lat),
                     longitudine: parseFloat(lng),
                     status: 'nou',
+                    pozaURL: pozaURL,
                     creatDe: auth.currentUser ? auth.currentUser.uid : 'anonim',
                     creatLa: serverTimestamp()
                 });
 
                 document.getElementById('mesaj-succes').classList.remove('d-none');
                 document.getElementById('form-sesizare').reset();
+                fisierSelectat = null;
+                document.getElementById('preview-container').classList.add('d-none');
                 setTimeout(() => { window.location.href = 'index.html'; }, 2000);
             } catch (error) {
                 alert('Eroare la trimiterea sesizării: ' + error.message);
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Trimite Sesizarea';
             }
         });
     </script>
