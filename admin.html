@@ -243,7 +243,8 @@
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             collection, query, orderBy, onSnapshot,
-            doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp
+            doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp,
+            getDoc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         /* ── State ── */
@@ -253,6 +254,7 @@
         let allResponsabili = [];
         let currentDept = '';
         let currentResponsabilId = '';
+        let mesajeUnsubscribe = null; // listener cleanup pentru subcollection mesaje
 
         /* ── Constante ── */
         const CAT_LABEL = {
@@ -594,6 +596,35 @@
                 ${s.latitudine && s.longitudine ? `<div class="detail-field mt-3"><div class="detail-lbl">Coordonate GPS</div><div class="detail-val">📍 ${s.latitudine.toFixed(5)}, ${s.longitudine.toFixed(5)}<br><a href="https://maps.google.com/?q=${s.latitudine},${s.longitudine}" target="_blank" style="font-size:.78rem;color:#60a5fa;">Deschide în Google Maps ↗</a></div><div id="map-detalii" style="height:150px; width:100%; border-radius:8px; margin-top:8px; border:1px solid rgba(255,255,255,0.1); z-index:1;"></div></div>` : ''}
                 <div class="detail-field" style="margin-top:10px;"><div class="detail-lbl">Creat de</div><div class="detail-val" style="font-size:.72rem;opacity:.4;">${s.creatDe || 'anonim'}</div></div>
             </div>
+        </div>
+
+        <!-- ════ SECȚIUNEA MESAJE ADMIN → CETĂȚEAN ════ -->
+        <div class="admin-msg-section" id="admin-msg-section">
+            <div class="admin-msg-hdr">
+                <span>💬 Mesaje către cetățean</span>
+                <span class="admin-msg-count" id="admin-msg-count">0 mesaje</span>
+            </div>
+            <!-- Thread mesaje -->
+            <div class="admin-msg-thread" id="admin-msg-thread">
+                <div style="text-align:center;padding:16px;color:rgba(255,255,255,.3);font-size:.8rem;">⏳ Se încarcă mesajele...</div>
+            </div>
+            <!-- Formular trimitere -->
+            <div class="admin-msg-compose">
+                <textarea
+                    id="admin-msg-text"
+                    class="admin-msg-textarea"
+                    placeholder="Scrie un mesaj pentru cetățean... (ex: Sesizarea a fost preluată de echipă)"
+                    rows="3"
+                    maxlength="1000"
+                ></textarea>
+                <div class="admin-msg-footer">
+                    <span class="admin-msg-chars" id="admin-msg-chars">0 / 1000</span>
+                    <button class="admin-msg-send" id="admin-msg-send" onclick="trimitemesajAdmin('${s.id}')">
+                        📨 Trimite mesaj
+                    </button>
+                </div>
+                <div id="admin-msg-eroare" class="d-none" style="font-size:.78rem;color:#f08080;margin-top:6px;"></div>
+            </div>
         </div>`;
 
             const myModalEl = document.getElementById('modalDetalii');
@@ -615,11 +646,110 @@
                 }
             }, 250);
 
-            // Când modalul se închide complet, ștergem ID-ul reținut
+            // Când modalul se închide complet, ștergem ID-ul reținut și oprim listener-ul de mesaje
             myModalEl.addEventListener('hidden.bs.modal', function onHide() {
                 currentSesizareId = null;
+                if (mesajeUnsubscribe) { mesajeUnsubscribe(); mesajeUnsubscribe = null; }
                 myModalEl.removeEventListener('hidden.bs.modal', onHide);
             });
+
+            // Pornim listener live pentru mesajele acestei sesizări
+            incarcaMesajeAdmin(s.id);
+
+            // Contor caractere textarea
+            setTimeout(() => {
+                const ta = document.getElementById('admin-msg-text');
+                const charCount = document.getElementById('admin-msg-chars');
+                if (ta && charCount) {
+                    ta.addEventListener('input', () => {
+                        charCount.textContent = ta.value.length + ' / 1000';
+                    });
+                }
+            }, 150);
+        };
+
+        /* ── Mesaje Admin → Cetățean ── */
+        function incarcaMesajeAdmin(sesId) {
+            // Oprim listener-ul anterior
+            if (mesajeUnsubscribe) { mesajeUnsubscribe(); mesajeUnsubscribe = null; }
+
+            const qM = query(
+                collection(db, 'Sesizari', sesId, 'Mesaje'),
+                orderBy('trimisLa', 'asc')
+            );
+
+            mesajeUnsubscribe = onSnapshot(qM, (snap) => {
+                const thread = document.getElementById('admin-msg-thread');
+                const countEl = document.getElementById('admin-msg-count');
+                if (!thread) return;
+
+                if (snap.empty) {
+                    thread.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.25);font-size:.8rem;">📭 Niciun mesaj trimis încă cetățeanului.</div>';
+                    if (countEl) countEl.textContent = '0 mesaje';
+                    return;
+                }
+
+                if (countEl) countEl.textContent = snap.size + (snap.size === 1 ? ' mesaj' : ' mesaje');
+
+                thread.innerHTML = '';
+                snap.forEach(d => {
+                    const m = d.data();
+                    const data = m.trimisLa ? new Date(m.trimisLa.seconds * 1000).toLocaleString('ro-RO') : '';
+                    const citit = m.cititDeCetatan;
+                    const bubble = document.createElement('div');
+                    bubble.className = 'admin-msg-bubble admin';
+                    bubble.innerHTML = `
+                        <div class="msg-text">${escapeHtml(m.text)}</div>
+                        <div class="msg-meta">
+                            <span>🕐 ${data}</span>
+                            <span style="color:${citit ? '#4ade80' : 'rgba(255,255,255,.3)'}">${citit ? '✅ Citit de cetățean' : '⏳ Necitiit'}</span>
+                        </div>`;
+                    thread.appendChild(bubble);
+                });
+                // Scroll to bottom
+                thread.scrollTop = thread.scrollHeight;
+            });
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+        }
+
+        window.trimitemesajAdmin = async function (sesId) {
+            const ta = document.getElementById('admin-msg-text');
+            const errEl = document.getElementById('admin-msg-eroare');
+            const sendBtn = document.getElementById('admin-msg-send');
+            if (!ta || !sesId) return;
+
+            const text = ta.value.trim();
+            if (!text) {
+                errEl.textContent = '⚠️ Scrie un mesaj înainte de a trimite!';
+                errEl.classList.remove('d-none');
+                setTimeout(() => errEl.classList.add('d-none'), 3000);
+                return;
+            }
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = '⏳ Se trimite...';
+            errEl.classList.add('d-none');
+
+            try {
+                await addDoc(collection(db, 'Sesizari', sesId, 'Mesaje'), {
+                    text: text,
+                    trimisLa: serverTimestamp(),
+                    trimisDeAdmin: true,
+                    cititDeCetatan: false
+                });
+                ta.value = '';
+                document.getElementById('admin-msg-chars').textContent = '0 / 1000';
+                toast('Mesaj trimis cetățeanului ✓');
+            } catch (e) {
+                errEl.textContent = '❌ Eroare: ' + e.message;
+                errEl.classList.remove('d-none');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📨 Trimite mesaj';
+            }
         };
 
         /* ── Șterge sesizare ── */

@@ -436,3 +436,107 @@
     .btn-dash-logout { width: 100%; text-align: center; }
     .auth-card { padding: 24px 18px 20px; }
 }
+
+/* ══════════════════════════════════════════
+   MESAJE ADMIN → CETĂȚEAN (în dashboard)
+   ══════════════════════════════════════════ */
+
+/* Buton toggle mesaje */
+.btn-toggle-msgs {
+    background: rgba(77,166,255,0.10);
+    border: 1px solid rgba(77,166,255,0.25);
+    color: #4da6ff;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.btn-toggle-msgs:hover {
+    background: rgba(77,166,255,0.18);
+    color: #80c8ff;
+}
+
+/* Badge mesaj nou */
+.my-sez-msg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(240,192,64,0.15);
+    border: 1px solid rgba(240,192,64,0.35);
+    color: #f0c040;
+    border-radius: 50px;
+    padding: 3px 10px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    margin-top: 5px;
+    animation: pulse-badge 1.8s infinite;
+}
+@keyframes pulse-badge {
+    0%,100% { box-shadow: 0 0 0 0 rgba(240,192,64,0.3); }
+    50%      { box-shadow: 0 0 0 5px rgba(240,192,64,0); }
+}
+
+/* Thread container */
+.my-sez-thread {
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.25s;
+}
+
+.my-sez-thread-inner {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Empty / Loading states */
+.thread-loading, .thread-empty {
+    text-align: center;
+    padding: 16px;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+}
+
+/* Chat bubbles */
+.citizen-msg-bubble {
+    max-width: 85%;
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+
+.citizen-msg-bubble.from-admin {
+    background: rgba(77,166,255,0.12);
+    border: 1px solid rgba(77,166,255,0.22);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.citizen-msg-bubble.from-citizen {
+    background: rgba(240,192,64,0.10);
+    border: 1px solid rgba(240,192,64,0.2);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.cmsg-text {
+    font-size: 0.88rem;
+    color: #e8eaf6;
+    line-height: 1.55;
+    margin-bottom: 5px;
+}
+
+.cmsg-meta {
+    font-size: 0.71rem;
+    color: rgba(255,255,255,0.35);
+}
+

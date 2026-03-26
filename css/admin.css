@@ -727,3 +727,138 @@
                 display: none;
             }
         }
+
+        /* ══════════════════════════════════════
+           SECȚIUNEA MESAJE ADMIN → CETĂȚEAN
+           (în modalul de detalii sesizare)
+           ══════════════════════════════════════ */
+        .admin-msg-section {
+            margin-top: 20px;
+            border: 1px solid rgba(240,192,64,0.2);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(240,192,64,0.03);
+        }
+
+        .admin-msg-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 16px;
+            background: rgba(240,192,64,0.08);
+            border-bottom: 1px solid rgba(240,192,64,0.15);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f0c040;
+        }
+
+        .admin-msg-count {
+            background: rgba(240,192,64,0.15);
+            border: 1px solid rgba(240,192,64,0.3);
+            color: #f0c040;
+            border-radius: 50px;
+            padding: 1px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* Thread bubbles */
+        .admin-msg-thread {
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .admin-msg-bubble {
+            background: rgba(240,192,64,0.10);
+            border: 1px solid rgba(240,192,64,0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .msg-text {
+            font-size: 0.85rem;
+            color: #e8eaf6;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .msg-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.35);
+        }
+
+        /* Compose area */
+        .admin-msg-compose {
+            padding: 12px 14px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .admin-msg-textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #e8eaf6;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            min-height: 72px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .admin-msg-textarea:focus {
+            border-color: #f0c040;
+            box-shadow: 0 0 0 3px rgba(240,192,64,0.1);
+        }
+
+        .admin-msg-textarea::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+
+        .admin-msg-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .admin-msg-chars {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .admin-msg-send {
+            background: linear-gradient(135deg, #c08a00, #f0c040);
+            color: #1a1000;
+            border: none;
+            border-radius: 9px;
+            padding: 8px 18px;
+            font-size: 0.83rem;
+            font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-msg-send:hover {
+            background: linear-gradient(135deg, #d9a000, #ffd700);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(240,192,64,0.3);
+        }
+
+        .admin-msg-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
