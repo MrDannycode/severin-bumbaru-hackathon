@@ -1029,13 +1029,8 @@
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.href = 'index.html'; return; }
             const rol = await obtineRolUtilizator(user.uid);
-<<<<<<< HEAD
             if (rol !== 'GstAdmin') {
                 alert('Acces interzis! Doar GstAdmin poate accesa această pagină.');
-=======
-            if (rol !== 'admin') {
-                alert('Acces interzis! Doar administratorii pot accesa această pagină.');
->>>>>>> c4e486a3b7f631f9ebf6cceec32e14e342277b03
                 window.location.href = 'index.html'; return;
             }
             initAdmin();
@@ -1051,6 +1046,10 @@
                 updateSidebarCounts();
                 renderTable();
                 renderPanelResponsabili(); // actualizăm workload-ul la fiecare schimbare
+            }, (error) => {
+                console.error("Eroare la onSnapshot Sesizari:", error);
+                alert("Eroare Firebase: " + error.message);
+                document.getElementById('tabel-sesizari').innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">🚫</div>Eroare: ${error.message}</div></td></tr>`;
             });
         }
 
@@ -1091,30 +1090,6 @@
         /* ── Filtre ── */
         window.aplicaFiltre = function () { renderTable(); };
 
-<<<<<<< HEAD
-        /* ── Render table ── */
-        function renderTable() {
-            const search = (document.getElementById('f-search')?.value || '').toLowerCase();
-            const fSt = document.getElementById('f-status')?.value || '';
-            const fPr = document.getElementById('f-prioritate')?.value || '';
-
-            let rows = allSesizari;
-            if (currentDept) rows = rows.filter(s => s.categorie === currentDept);
-            if (fSt) rows = rows.filter(s => s.status === fSt);
-            if (fPr) rows = rows.filter(s => s.prioritate === fPr);
-            if (search) rows = rows.filter(s =>
-                (s.titlu || '').toLowerCase().includes(search) ||
-                (s.descriere || '').toLowerCase().includes(search) ||
-                (s.strada || '').toLowerCase().includes(search)
-            );
-
-            const tbody = document.getElementById('tabel-sesizari');
-            if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">📭</div>Nicio sesizare găsită</div></td></tr>';
-                return;
-            }
-
-=======
         window.reseteazaFiltre = function() {
             document.getElementById('f-search').value = '';
             document.getElementById('f-status').value = '';
@@ -1150,7 +1125,6 @@
                 return;
             }
 
->>>>>>> c4e486a3b7f631f9ebf6cceec32e14e342277b03
             tbody.innerHTML = rows.map(s => {
                 const data = s.creatLa
                     ? new Date(s.creatLa.seconds * 1000).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
