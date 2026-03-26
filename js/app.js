@@ -27,6 +27,15 @@ onAuthStateChanged(auth, async (user) => {
             const adminRoles = ['SysAdmin', 'GstAdmin', 'DptAdmin'];
             if (adminRoles.includes(rol)) {
                 btnAdmin.classList.remove('d-none');
+                // SysAdmin → pagina de gestionare departamente
+                // GstAdmin și DptAdmin → panoul admin sesizări
+                if (rol === 'SysAdmin') {
+                    btnAdmin.href = 'sysadmin.html';
+                    btnAdmin.textContent = '⚙️ SysAdmin Panel';
+                } else {
+                    btnAdmin.href = 'admin.html';
+                    btnAdmin.textContent = '🛠️ Admin Panel';
+                }
             } else {
                 btnAdmin.classList.add('d-none');
             }
