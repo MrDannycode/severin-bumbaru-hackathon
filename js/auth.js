@@ -65,7 +65,7 @@ export async function delogare() {
 
 /**
  * Funcție utilitară pentru a afla rolul utilizatorului curent
- * (Va fi folosită de Rolul 1 pentru a ascunde/afișa interfața de admin)
+ * Roluri posibile: "citizen", "SysAdmin", "GstAdmin", "DptAdmin"
  * @param {string} uid - ID-ul utilizatorului logat
  */
 export async function obtineRolUtilizator(uid) {
@@ -74,7 +74,7 @@ export async function obtineRolUtilizator(uid) {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            return docSnap.data().role; // Va returna "citizen" sau "admin"
+            return docSnap.data().role; // Va returna "citizen", "SysAdmin", "GstAdmin" sau "DptAdmin"
         } else {
             return "citizen"; // Fallback de siguranță
         }
