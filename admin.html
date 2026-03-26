@@ -244,7 +244,7 @@
     <script type="module">
         import { auth, db } from './js/firebase.js';
         import { obtineRolUtilizator } from './js/auth.js';
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { onAuthStateChanged, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             collection, query, orderBy, onSnapshot,
@@ -495,6 +495,8 @@
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
                     <button class="act-btn save" onclick="salveazaStatus('${s.id}')">💾 Actualizează</button>
                     <button class="act-btn"      onclick="veziDetalii('${s.id}')">👁 Detalii</button>
+                    <button class="act-btn" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);"
+                        onclick="deschideTrimitereDept('${s.id}')">📨 Trimite Dept</button>
                     <button class="act-btn del"  onclick="stergeSesizare('${s.id}')">🗑️</button>
                 </div>
             </td>
@@ -774,8 +776,8 @@
                 try {
                     tempApp = initializeApp(FIREBASE_CONFIG, 'TempDeptCreator');
                 } catch(e) {
-                    // Dacă instanța există deja (apel repetat), o refolosim
-                    tempApp = initializeApp(FIREBASE_CONFIG, 'TempDeptCreator');
+                    // Instanța există deja din apelul anterior — o refolosim cu getApp
+                    tempApp = getApp('TempDeptCreator');
                 }
                 const tempAuth = getAuth(tempApp);
 
@@ -810,6 +812,93 @@
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🔐 Creează Contul și Alocă Rolul';
+            }
+        };
+
+        /* ── Trimitere către Departament ── */
+        let sesizareCurentaPtDept = null;
+        window.deschideTrimitereDept = function(id) {
+            sesizareCurentaPtDept = id;
+            
+            // Calculăm câte sesizări are fiecare departament
+            // Note: folosim s.status !== 'rezolvat' pentru a număra doar cele active
+            const qInfr = allSesizari.filter(s => s.departamentAlocat === 'infrastructura' && s.status !== 'rezolvat').length;
+            const qIlum = allSesizari.filter(s => s.departamentAlocat === 'iluminat' && s.status !== 'rezolvat').length;
+            const qCura = allSesizari.filter(s => s.departamentAlocat === 'curatenie' && s.status !== 'rezolvat').length;
+            const qParc = allSesizari.filter(s => s.departamentAlocat === 'parcuri' && s.status !== 'rezolvat').length;
+            const qAlt = allSesizari.filter(s => s.departamentAlocat === 'altele' && s.status !== 'rezolvat').length;
+
+            // Actualizăm opțiunile direct cu numărul
+            const sel = document.getElementById('sel-dept-trimitere');
+            if (sel) {
+                sel.innerHTML = `
+                    <option value="infrastructura">🕳️ Infrastructură (${qInfr} sesizări active)</option>
+                    <option value="iluminat">💡 Iluminat Public (${qIlum} sesizări active)</option>
+                    <option value="curatenie">♻️ Curățenie (${qCura} sesizări active)</option>
+                    <option value="parcuri">🌳 Spații Verzi (${qParc} sesizări active)</option>
+                    <option value="altele">⚙️ Altele (${qAlt} sesizări active)</option>
+                `;
+            }
+
+            new bootstrap.Modal(document.getElementById('modalTrimiteDept')).show();
+        };
+
+        window.confirmaTrimitereDept = async function() {
+            const btn = document.getElementById('btn-confirma-trimitere');
+            const errDiv = document.getElementById('err-trimite-dept');
+            const deptId = document.getElementById('sel-dept-trimitere').value;
+
+            if (!sesizareCurentaPtDept) return;
+            errDiv.classList.add('d-none');
+            
+            btn.disabled = true;
+            btn.textContent = 'Trimitere...';
+
+            try {
+                await updateDoc(doc(db, 'Sesizari', sesizareCurentaPtDept), {
+                    departamentAlocat: deptId,
+                    status: 'in_lucru', // Trecem direct in lucru cand e preluat de dept
+                    actualizatLa: serverTimestamp()
+                });
+                toast(`Sesizarea a fost trimisă către ${deptId.toUpperCase()}! 📨`);
+                bootstrap.Modal.getInstance(document.getElementById('modalTrimiteDept'))?.hide();
+            } catch (error) {
+                console.error("Eroare trimitere departament:", error);
+                errDiv.textContent = 'Eroare: ' + error.message;
+                errDiv.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📨 Confirmă Trimiterea';
+                sesizareCurentaPtDept = null;
+            }
+        };
+        window.anuleazaTrimitereDept = async function() {
+            const btn = document.getElementById('btn-anuleaza-trimitere');
+            const errDiv = document.getElementById('err-trimite-dept');
+
+            if (!sesizareCurentaPtDept) return;
+            errDiv.classList.add('d-none');
+            
+            btn.disabled = true;
+            btn.textContent = 'Se anulează...';
+
+            try {
+                // Setăm departamentul pe gol și statusul înapoi pe 'nou'
+                await updateDoc(doc(db, 'Sesizari', sesizareCurentaPtDept), {
+                    departamentAlocat: "",
+                    status: 'nou',
+                    actualizatLa: serverTimestamp()
+                });
+                toast('Sesizarea a fost retrasă de la departament! 🔄');
+                bootstrap.Modal.getInstance(document.getElementById('modalTrimiteDept'))?.hide();
+            } catch (error) {
+                console.error("Eroare anulare trimitere:", error);
+                errDiv.textContent = 'Eroare: ' + error.message;
+                errDiv.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Retrage Sesizarea (Anulează Trimiterea)';
+                sesizareCurentaPtDept = null;
             }
         };
     </script>
@@ -854,6 +943,42 @@
                     <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.3);text-align:center;">
                         Contul va putea accesa <strong>dptadmin.html</strong> cu emailul și parola setate mai sus.
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TRIMITE DEPARTAMENT -->
+    <div class="modal fade" id="modalTrimiteDept" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">📨 Trimite către Departament</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:18px 22px;">
+                    <p style="font-size:0.85rem; color:rgba(255,255,255,.7); margin-bottom:15px;">
+                        Alege departamentul care trebuie să preia această sesizare. Sesizarea va apărea instant în panoul DptAdmin-ului respectiv și va fi marcată ca <strong>În Lucru</strong>.
+                    </p>
+                    <div class="mb-3">
+                        <label class="mlbl">Alege Departament Target *</label>
+                        <select class="form-select mfc" id="sel-dept-trimitere">
+                            <option value="infrastructura">🕳️ Infrastructură</option>
+                            <option value="iluminat">💡 Iluminat Public</option>
+                            <option value="curatenie">♻️ Curățenie</option>
+                            <option value="parcuri">🌳 Spații Verzi</option>
+                            <option value="altele">⚙️ Altele</option>
+                        </select>
+                    </div>
+                    <div id="err-trimite-dept" class="d-none mb-3"
+                        style="background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.27);border-radius:8px;padding:8px 12px;font-size:.83rem;color:#f87171;">
+                    </div>
+                    <button class="btn btn-warning w-100 mb-2" id="btn-confirma-trimitere" onclick="confirmaTrimitereDept()">
+                        📨 Confirmă Trimiterea
+                    </button>
+                    <button class="btn btn-outline-danger w-100" id="btn-anuleaza-trimitere" onclick="anuleazaTrimitereDept()">
+                        🔄 Retrage Sesizarea (Anulează Trimiterea)
+                    </button>
                 </div>
             </div>
         </div>

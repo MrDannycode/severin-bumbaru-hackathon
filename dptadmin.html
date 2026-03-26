@@ -54,6 +54,33 @@
             </a>
 
             <div class="sb-divider"></div>
+            <div class="sidebar-section">Categorii Sesizări</div>
+            <a class="sb-item" href="#" onclick="filtrCategorie('',this);return false;" id="sb-cat-all">
+                <div class="sb-left"><span class="sb-icon">📋</span> Toate Categoriile</div>
+                <span class="sb-badge" id="cnt-cat-all">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrCategorie('infrastructura',this);return false;">
+                <div class="sb-left"><span class="sb-icon">🕳️</span> Infrastructură</div>
+                <span class="sb-badge" id="cnt-cat-infrastructura">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrCategorie('iluminat',this);return false;">
+                <div class="sb-left"><span class="sb-icon">💡</span> Iluminat Public</div>
+                <span class="sb-badge" id="cnt-cat-iluminat">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrCategorie('curatenie',this);return false;">
+                <div class="sb-left"><span class="sb-icon">♻️</span> Curățenie</div>
+                <span class="sb-badge" id="cnt-cat-curatenie">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrCategorie('parcuri',this);return false;">
+                <div class="sb-left"><span class="sb-icon">🌳</span> Spații Verzi</div>
+                <span class="sb-badge" id="cnt-cat-parcuri">0</span>
+            </a>
+            <a class="sb-item" href="#" onclick="filtrCategorie('altele',this);return false;">
+                <div class="sb-left"><span class="sb-icon">⚙️</span> Altele</div>
+                <span class="sb-badge" id="cnt-cat-altele">0</span>
+            </a>
+
+            <div class="sb-divider"></div>
             <div class="sidebar-section">Membri / Angajați</div>
             <a class="sb-item" href="#"
                 onclick="new bootstrap.Modal(document.getElementById('modalAdaugaResp')).show();return false;">
@@ -233,6 +260,7 @@
         let currentSesizareId = null;
         let allResponsabili = [];
         let currentEchipa = '';
+        let currentCategorie = '';
         let currentResponsabilId = '';
 
         /* ── Constante Echipe ── */
@@ -299,21 +327,26 @@
         function initDeptAdmin(dept) {
             loadResponsabili();
 
-            // Filtru: arată doar sesizările alocate acestui departament
-            let q;
-            if (dept) {
-                q = query(
-                    collection(db, 'Sesizari'),
-                    where('departamentAlocat', '==', dept),
-                    orderBy('creatLa', 'desc')
-                );
-            } else {
-                // Fallback — dacă departamentul nu e setat, arată tot
-                q = query(collection(db, 'Sesizari'), orderBy('creatLa', 'desc'));
+            console.log('[DptAdmin] Departament detectat:', dept);
+
+            if (!dept) {
+                // Departamentul nu a putut fi citit din profilul contului
+                document.getElementById('tabel-sesizari').innerHTML =
+                    '<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">⚠️</div>' +
+                    'Departamentul nu este configurat pentru acest cont.<br>' +
+                    '<span style="font-size:.75rem;opacity:.5;">Contactați GstAdmin pentru a seta câmpul <strong>departamentAsociat</strong>.</span>' +
+                    '</div></td></tr>';
+                return;
             }
 
+            // Doar sesizările trimise explicit de GstAdmin spre acest departament
+            const q = query(collection(db, 'Sesizari'));
+
             onSnapshot(q, snap => {
-                allSesizari = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const toate = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allSesizari = toate
+                    .filter(s => s.departamentAlocat === dept)
+                    .sort((a, b) => (b.creatLa?.seconds || 0) - (a.creatLa?.seconds || 0));
                 updateKPI();
                 updateSidebarCounts();
                 renderTable();
@@ -322,6 +355,9 @@
                 if (currentSesizareId) veziDetalii(currentSesizareId, false);
             }, (error) => {
                 console.error("Eroare Firebase:", error);
+                // Eroarea frecventă: lipsă index compozit în Firestore
+                document.getElementById('tabel-sesizari').innerHTML =
+                    `<tr><td colspan="6"><div class="empty-state"><div class="empty-ico">🚫</div>Eroare Firestore: ${error.message}</div></td></tr>`;
             });
         }
 
@@ -344,11 +380,26 @@
                 const el = document.getElementById('cnt-' + d);
                 if (el) el.textContent = allSesizari.filter(s => s.echipaAlocata === d).length;
             });
+            // Contoare categorii
+            const catEl = document.getElementById('cnt-cat-all');
+            if (catEl) catEl.textContent = allSesizari.length;
+            ['infrastructura', 'iluminat', 'curatenie', 'parcuri', 'altele'].forEach(c => {
+                const el = document.getElementById('cnt-cat-' + c);
+                if (el) el.textContent = allSesizari.filter(s => s.categorie === c).length;
+            });
         }
 
         /* ── Filtru echipă (global) ── */
         window.filtrEchipa = function (echipa, el) {
             currentEchipa = echipa;
+            document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderTable();
+        };
+
+        /* ── Filtru categorie (global) ── */
+        window.filtrCategorie = function (cat, el) {
+            currentCategorie = cat;
             document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
             if (el) el.classList.add('active');
             renderTable();
@@ -360,6 +411,7 @@
             document.getElementById('f-status').value = '';
             document.getElementById('f-echipa').value = '';
             currentEchipa = '';
+            currentCategorie = '';
             currentResponsabilId = '';
             document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
             document.getElementById('sb-all')?.classList.add('active');
@@ -428,6 +480,7 @@
 
             let rows = allSesizari;
             if (currentEchipa) rows = rows.filter(s => s.echipaAlocata === currentEchipa);
+            if (currentCategorie) rows = rows.filter(s => s.categorie === currentCategorie);
             if (fEch) rows = rows.filter(s => s.echipaAlocata === fEch);
             if (fSt) rows = rows.filter(s => s.status === fSt);
             if (currentResponsabilId) rows = rows.filter(s => s.responsabilId === currentResponsabilId);

@@ -8,11 +8,21 @@ import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/fireba
 // Actualizează UI-ul navbar (butonul Admin) în funcție de starea autentificării
 // Autentificarea cetățenilor este gestionată de cont.html
 onAuthStateChanged(auth, async (user) => {
+    const btnLogin = document.getElementById('btnLogin');
     const btnAdmin = document.getElementById('btnAdmin');
 
     if (user) {
         const rol = await obtineRolUtilizator(user.uid);
 
+        // Butonul Login → Delogare
+        if (btnLogin) {
+            btnLogin.textContent = `⚙ ${user.email}`;
+            btnLogin.removeAttribute('data-bs-toggle');
+            btnLogin.removeAttribute('data-bs-target');
+            btnLogin.onclick = async () => { await signOut(auth); };
+        }
+
+        // Butonul Admin
         if (btnAdmin) {
             const adminRoles = ['SysAdmin', 'GstAdmin', 'DptAdmin'];
             if (adminRoles.includes(rol)) {
@@ -33,6 +43,13 @@ onAuthStateChanged(auth, async (user) => {
         }
 
     } else {
+        // Niciun utilizator logat — resetăm butonul Login
+        if (btnLogin) {
+            btnLogin.textContent = '⚙ Cont';
+            btnLogin.setAttribute('data-bs-toggle', 'modal');
+            btnLogin.setAttribute('data-bs-target', '#loginModal');
+            btnLogin.onclick = null;
+        }
         if (btnAdmin) btnAdmin.classList.add('d-none');
     }
 });
