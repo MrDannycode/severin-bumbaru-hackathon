@@ -15,6 +15,12 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         const rol = await obtineRolUtilizator(user.uid);
 
+        // Redirect SysAdmin directly
+        if (rol === 'SysAdmin') {
+            window.location.href = 'sysadmin.html';
+            return;
+        }
+
         if (btnLogin) {
             btnLogin.textContent = `📧 ${user.email}`;
             btnLogin.onclick = null;
@@ -29,6 +35,9 @@ onAuthStateChanged(auth, async (user) => {
                 if (rol === 'SysAdmin') {
                     btnAdmin.href = 'sysadmin.html';
                     btnAdmin.textContent = '⚙️ SysAdmin Panel';
+                } else if (rol === 'DptAdmin') {
+                    btnAdmin.href = 'dptadmin.html';
+                    btnAdmin.textContent = '🏢 Panoul Meu';
                 } else {
                     btnAdmin.href = 'admin.html';
                     btnAdmin.textContent = '🛠️ Admin Panel';
@@ -36,6 +45,12 @@ onAuthStateChanged(auth, async (user) => {
             } else {
                 btnAdmin.classList.add('d-none');
             }
+        }
+
+        // Redirect logs
+        if (window.location.pathname.endsWith('cont.html')) {
+            window.location.href = 'citizen.html';
+            return;
         }
 
         // Afișăm dashboard-ul cetățeanului
@@ -50,6 +65,11 @@ onAuthStateChanged(auth, async (user) => {
         }
         if (btnAdmin) btnAdmin.classList.add('d-none');
 
+        if (window.location.pathname.endsWith('citizen.html')) {
+            window.location.href = 'cont.html';
+            return;
+        }
+
         showAuth();
     }
 });
@@ -58,14 +78,22 @@ onAuthStateChanged(auth, async (user) => {
 // SHOW / HIDE SECTIONS
 // ──────────────────────────────────────────────
 function showAuth() {
-    document.getElementById('sectiune-auth').style.display = '';
-    document.getElementById('sectiune-auth').classList.remove('d-none');
-    document.getElementById('sectiune-dashboard').classList.add('d-none');
+    const authSec = document.getElementById('sectiune-auth');
+    const dashSec = document.getElementById('sectiune-dashboard');
+    if (authSec) {
+        authSec.style.display = '';
+        authSec.classList.remove('d-none');
+    }
+    if (dashSec) {
+        dashSec.classList.add('d-none');
+    }
 }
 
 function showDashboard(user, rol) {
-    document.getElementById('sectiune-auth').classList.add('d-none');
-    document.getElementById('sectiune-dashboard').classList.remove('d-none');
+    const authSec = document.getElementById('sectiune-auth');
+    const dashSec = document.getElementById('sectiune-dashboard');
+    if (authSec) authSec.classList.add('d-none');
+    if (dashSec) dashSec.classList.remove('d-none');
 
     // Populăm datele profilului
     document.getElementById('dash-email').textContent = user.email;
