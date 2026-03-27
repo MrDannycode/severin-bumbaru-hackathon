@@ -244,7 +244,7 @@
         import { auth, db } from './js/firebase.js';
         import { obtineRolUtilizator } from './js/auth.js';
         import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { onAuthStateChanged, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { onAuthStateChanged, getAuth, createUserWithEmailAndPassword, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             collection, query, orderBy, onSnapshot,
             doc, updateDoc, deleteDoc, addDoc, getDocs, serverTimestamp, setDoc
@@ -666,8 +666,14 @@
                 const color = DEPT_COLORS[dept.key] || '#60a5fa';
                 const resps = allResponsabili.filter(r => r.departament === dept.key);
                 const sesCount = allSesizari.filter(s => s.categorie === dept.key).length;
+                let options = `<option value="">— Fără cont asociat —</option>`;
+                allDptAdmins.forEach(u => {
+                    const sel = u.departamentAsociat === dept.key ? 'selected' : '';
+                    options += `<option value="${u.id}" ${sel}>${u.email} (${u.numeSef || 'Fără nume'})</option>`;
+                });
+                
                 const dptUser = allDptAdmins.find(u => u.departamentAsociat === dept.key);
-                const emailStr = dptUser ? dptUser.email : '— Lipsă cont administrator —';
+                const currentDptUserId = dptUser ? dptUser.id : '';
 
                 html += `<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:rgba(255,255,255,.03);">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
@@ -675,7 +681,8 @@
                         <div style="font-size:.7rem;color:rgba(255,255,255,.3);">${sesCount} sesizări</div>
                     </div>
                     <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:8px; display:flex; gap:5px; align-items:center;">
-                        <span style="font-size:.85rem; opacity:0.8;">📧</span> <span style="font-family:monospace; background:rgba(0,0,0,0.2); padding:2px 5px; border-radius:4px;">${emailStr}</span>
+                        <span style="font-size:.85rem; opacity:0.8;">📧</span> 
+                        <select class="form-select form-select-sm" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:.7rem; padding: 2px 5px;" onchange="alocaContDepartament('${dept.key}', this.value, '${currentDptUserId}')">${options}</select>
                     </div>`;
 
                 if (!resps.length) {
@@ -706,6 +713,26 @@
 
             panel.innerHTML = html || '<div class="empty-state"><div class="empty-ico">🏢</div>Niciun responsabil adăugat.</div>';
         }
+
+        /* ── Asociază Cont DptAdmin la Departament ── */
+        window.alocaContDepartament = async function(deptKey, newUserId, oldUserId) {
+            try {
+                // Dacă exista un cont vechi, îi scoatem asocierea
+                if (oldUserId && oldUserId !== newUserId) {
+                    await updateDoc(doc(db, 'Users', oldUserId), { departamentAsociat: '' });
+                }
+                // Dacă se asociază un cont nou diferit de gol
+                if (newUserId) {
+                    await updateDoc(doc(db, 'Users', newUserId), { departamentAsociat: deptKey });
+                }
+                toast('Cont alocat departamentului cu succes! 🔄');
+                loadDptAdmins(); // Re-fetch the data which automatically re-renders the panel
+            } catch(e) {
+                console.error("Eroare asociere cont:", e);
+                toast('Eroare la asociere: ' + e.message, false);
+                renderPanelResponsabili();
+            }
+        };
 
         /* ── Șterge responsabil ── */
         window.stergeResponsabil = async function (id) {
@@ -777,19 +804,19 @@
             btn.textContent = '⏳ Se creează contul...';
 
             try {
-                // Instanță temporară — nu deloghează adminul curent
-                let tempApp;
-                try {
-                    tempApp = initializeApp(FIREBASE_CONFIG, 'TempDeptCreator');
-                } catch(e) {
-                    // Instanța există deja din apelul anterior — o refolosim cu getApp
-                    tempApp = getApp('TempDeptCreator');
-                }
-                const tempAuth = getAuth(tempApp);
+                // 1. Creare cont folosind Firebase REST API (evită total suprascrierea sesiunii locale)
+                const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: parola, returnSecureToken: false })
+                });
 
-                // 1. Creare cont în Firebase Auth
-                const cred = await createUserWithEmailAndPassword(tempAuth, email, parola);
-                const nouUid = cred.user.uid;
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error?.message || 'Eroare necunoscută la crearea contului');
+                }
+                
+                const nouUid = data.localId;
 
                 // 2. Salvare profil + rol în Firestore (colecția "Users" – identică cu restul aplicației)
                 await setDoc(doc(db, 'Users', nouUid), {
@@ -800,10 +827,8 @@
                     creatLa: serverTimestamp()
                 });
 
-                // 3. Delogăm instanța temporară (nu afectează sesiunea adminului)
-                await tempAuth.signOut();
-
                 toast(`Cont creat pentru ${nume} → ${dept} ✓`);
+                loadDptAdmins(); // Re-fetch the data to update the dropdowns if necessary
 
                 // Resetăm formularul
                 document.getElementById('new-dept-nume').value  = '';
