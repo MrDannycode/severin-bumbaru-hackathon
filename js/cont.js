@@ -21,6 +21,18 @@ onAuthStateChanged(auth, async (user) => {
             return;
         }
 
+        // Redirect GstAdmin directly
+        if (rol === 'GstAdmin') {
+            window.location.href = 'admin.html';
+            return;
+        }
+
+        // Redirect DptAdmin directly
+        if (rol === 'DptAdmin') {
+            window.location.href = 'dptadmin.html';
+            return;
+        }
+
         if (btnLogin) {
             btnLogin.textContent = `📧 ${user.email}`;
             btnLogin.onclick = null;
@@ -245,10 +257,12 @@ window.togglePassword = function(inputId, btn) {
 // ──────────────────────────────────────────────
 // PASSWORD STRENGTH
 // ──────────────────────────────────────────────
-document.getElementById('r-parola').addEventListener('input', function () {
-    const val = this.value;
-    const bar = document.getElementById('strength-bar');
-    const lbl = document.getElementById('strength-label');
+const rParolaInput = document.getElementById('r-parola');
+if (rParolaInput) {
+    rParolaInput.addEventListener('input', function () {
+        const val = this.value;
+        const bar = document.getElementById('strength-bar');
+        const lbl = document.getElementById('strength-label');
 
     let score = 0;
     if (val.length >= 6) score++;
@@ -268,7 +282,8 @@ document.getElementById('r-parola').addEventListener('input', function () {
     bar.style.width = lvl.w;
     bar.style.background = lvl.bg;
     lbl.textContent = lvl.txt;
-});
+    });
+}
 
 // ──────────────────────────────────────────────
 // MESSAGE HELPER

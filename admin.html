@@ -26,6 +26,7 @@
         <div class="nav-right">
             <span class="admin-badge">👤 Administrator</span>
             <a href="index.html" class="btn-nav-sm">← Înapoi</a>
+            <button class="btn-logout" onclick="execLogout()">Delogare</button>
         </div>
     </nav>
 
@@ -242,7 +243,7 @@
 
     <script type="module">
         import { auth, db } from './js/firebase.js';
-        import { obtineRolUtilizator } from './js/auth.js';
+        import { obtineRolUtilizator, delogare } from './js/auth.js';
         import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { onAuthStateChanged, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
@@ -742,6 +743,12 @@
                 bootstrap.Modal.getInstance(document.getElementById('modalAdaugaResp'))?.hide();
             } catch (e) { err.textContent = 'Eroare: ' + e.message; err.classList.remove('d-none'); }
             btn.disabled = false; btn.textContent = 'Salvează';
+        };
+
+        /* ── Logout ── */
+        window.execLogout = async function () {
+            await delogare();
+            window.location.href = 'index.html';
         };
 
         /* ── Creare cont DptAdmin ── */

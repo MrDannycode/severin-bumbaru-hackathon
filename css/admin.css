@@ -110,6 +110,22 @@
             color: #fff;
         }
 
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: #f87171;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
         /* ═══ LAYOUT ═══ */
         .admin-layout {
             display: flex;
