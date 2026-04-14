@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityFix – Setare Departament DptAdmin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b1623;
+            color: #e0e6f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #101e30;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 36px 40px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #60a5fa;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .logo span { color: #e0e6f0; }
+
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+        .subtitle {
+            font-size: .82rem;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: .8rem;
+            color: #fbbf24;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e0e6f0;
+            font-family: 'Inter', sans-serif;
+            font-size: .88rem;
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color .2s;
+            margin-bottom: 18px;
+        }
+        input:focus, select:focus {
+            border-color: rgba(96,165,250,0.5);
+            background: rgba(96,165,250,0.05);
+        }
+        select option { background: #101e30; }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: .9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(37,99,235,0.35);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+            transform: translateY(-1px);
+        }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            font-size: .82rem;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); color: #e0e6f0; }
+
+        .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0; }
+
+        #status-box {
+            display: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: .84rem;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        #status-box.ok {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            color: #4ade80;
+        }
+        #status-box.err {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+
+        #users-list { display: none; }
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 8px;
+        }
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(96,165,250,0.15);
+            border: 1px solid rgba(96,165,250,0.3);
+            color: #60a5fa;
+            font-size: .75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-email { font-size: .82rem; font-weight: 600; color: #e0e6f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-dept {
+            font-size: .7rem;
+            color: rgba(255,255,255,.35);
+            margin-top: 2px;
+        }
+        .dept-badge {
+            font-size: .68rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+        .dept-badge.set { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+        .dept-badge.none { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">⚓ City<span>Fix</span></div>
+        <h1>Setare Departament DptAdmin</h1>
+        <p class="subtitle">Asociază un cont DptAdmin la departamentul său. Trebuie să fi logat ca <strong style="color:#fbbf24">GstAdmin</strong> sau <strong style="color:#fbbf24">SysAdmin</strong>.</p>
+
+        <div class="warning-box">
+            ⚠️ Această pagină modifică direct baza de date Firestore. Folosește-o doar dacă știi ce faci.
+        </div>
+
+        <!-- STEP 1: Autentificare -->
+        <div id="step-login">
+            <label>Email Admin</label>
+            <input type="email" id="admin-email" placeholder="admin@cityfix.ro">
+            <label>Parolă</label>
+            <input type="password" id="admin-pass" placeholder="••••••••">
+            <div id="status-box"></div>
+            <button class="btn btn-primary" id="btn-login" onclick="doLogin()">🔐 Autentifică-te</button>
+            <a href="index.html"><button class="btn btn-secondary" type="button">← Înapoi la pagina principală</button></a>
+        </div>
+
+        <!-- STEP 2: Asociere departament -->
+        <div id="step-set" style="display:none;">
+            <div id="status-box2" style="display:none;" class="ok"></div>
+
+            <label>Cont DptAdmin de modificat</label>
+            <select id="sel-user">
+                <option value="">Se încarcă utilizatorii...</option>
+            </select>
+
+            <label>Departament de asociat</label>
+            <select id="sel-dept">
+                <option value="">— Alege departamentul —</option>
+                <option value="infrastructura">🕳️ Infrastructură</option>
+                <option value="iluminat">💡 Iluminat Public</option>
+                <option value="curatenie">♻️ Curățenie</option>
+                <option value="parcuri">🌳 Spații Verzi</option>
+                <option value="altele">⚙️ Altele</option>
+            </select>
+
+            <button class="btn btn-primary" id="btn-salveaza" onclick="seteazaDepartament()">💾 Salvează Asocierea</button>
+
+            <div class="divider"></div>
+
+            <label style="margin-bottom:10px;">Conturi DptAdmin existente</label>
+            <div id="users-list"></div>
+
+            <button class="btn btn-secondary" onclick="doLogout()">🚪 Delogare</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdvEbQAi1HBbPm7qlaN_06jyZVkM0DeC4",
+            authDomain: "galati-city-fix.firebaseapp.com",
+            projectId: "galati-city-fix",
+            storageBucket: "galati-city-fix.firebasestorage.app",
+            messagingSenderId: "279223709756",
+            appId: "1:279223709756:web:f0c4b4dc4b7beb0cfa1339"
+        };
+
+        const app  = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db   = getFirestore(app);
+
+        const DEPT_LABEL = {
+            infrastructura: '🕳️ Infrastructură',
+            iluminat: '💡 Iluminat Public',
+            curatenie: '♻️ Curățenie',
+            parcuri: '🌳 Spații Verzi',
+            altele: '⚙️ Altele'
+        };
+
+        let allDptAdmins = [];
+
+        function showStatus(msg, ok = true) {
+            const box = document.getElementById('status-box');
+            box.textContent = msg;
+            box.className = ok ? 'ok' : 'err';
+            box.style.display = 'block';
+        }
+        function showStatus2(msg, ok = true) {
+            const box = document.getElementById('status-box2');
+            box.textContent = msg;
+            box.className = ok ? 'ok' : 'err';
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3500);
+        }
+
+        window.doLogin = async function () {
+            const email = document.getElementById('admin-email').value.trim();
+            const pass  = document.getElementById('admin-pass').value;
+            const btn   = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Se autentifică...';
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, pass);
+                const uid  = cred.user.uid;
+                const snap = await getDoc(doc(db, 'Users', uid));
+                const role = snap.exists() ? snap.data().role : 'citizen';
+                if (role !== 'GstAdmin' && role !== 'SysAdmin') {
+                    await signOut(auth);
+                    showStatus('❌ Acces interzis! Doar GstAdmin sau SysAdmin pot folosi acest instrument.', false);
+                    btn.disabled = false;
+                    btn.textContent = '🔐 Autentifică-te';
+                    return;
+                }
+                // Logare reușită
+                document.getElementById('step-login').style.display = 'none';
+                document.getElementById('step-set').style.display = 'block';
+                incarcaUseri();
+            } catch (e) {
+                showStatus('❌ ' + e.message, false);
+                btn.disabled = false;
+                btn.textContent = '🔐 Autentifică-te';
+            }
+        };
+
+        async function incarcaUseri() {
+            try {
+                const snap = await getDocs(collection(db, 'Users'));
+                allDptAdmins = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(u => u.role === 'DptAdmin');
+
+                const sel = document.getElementById('sel-user');
+                sel.innerHTML = '<option value="">— Alege contul DptAdmin —</option>';
+                allDptAdmins.forEach(u => {
+                    const dept = u.departamentAsociat ? ` (${DEPT_LABEL[u.departamentAsociat] || u.departamentAsociat})` : ' (fără dept)';
+                    sel.innerHTML += `<option value="${u.id}">${u.email}${dept}</option>`;
+                });
+
+                // Pre-selectăm departamentul când se alege un user
+                sel.onchange = () => {
+                    const u = allDptAdmins.find(x => x.id === sel.value);
+                    if (u && u.departamentAsociat) {
+                        document.getElementById('sel-dept').value = u.departamentAsociat;
+                    }
+                };
+
+                renderUsersList();
+            } catch (e) {
+                showStatus2('❌ Eroare la încărcarea utilizatorilor: ' + e.message, false);
+            }
+        }
+
+        function renderUsersList() {
+            const listDiv = document.getElementById('users-list');
+            if (!allDptAdmins.length) {
+                listDiv.innerHTML = '<div style="font-size:.8rem;color:rgba(255,255,255,.3);font-style:italic;">Niciun cont DptAdmin găsit.</div>';
+                listDiv.style.display = 'block';
+                return;
+            }
+            listDiv.style.display = 'block';
+            listDiv.innerHTML = allDptAdmins.map(u => {
+                const initials = (u.email || '?').slice(0, 2).toUpperCase();
+                const hasDept  = !!u.departamentAsociat;
+                return `<div class="user-row">
+                    <div class="user-avatar">${initials}</div>
+                    <div class="user-info">
+                        <div class="user-email">${u.email}</div>
+                        <div class="user-dept">${hasDept ? DEPT_LABEL[u.departamentAsociat] || u.departamentAsociat : 'Niciun departament asociat'}</div>
+                    </div>
+                    <span class="dept-badge ${hasDept ? 'set' : 'none'}">${hasDept ? '✓ Setat' : '✗ Lipsă'}</span>
+                </div>`;
+            }).join('');
+        }
+
+        window.seteazaDepartament = async function () {
+            const userId = document.getElementById('sel-user').value;
+            const dept   = document.getElementById('sel-dept').value;
+            const btn    = document.getElementById('btn-salveaza');
+
+            if (!userId) { showStatus2('❌ Alege un cont DptAdmin!', false); return; }
+            if (!dept)   { showStatus2('❌ Alege un departament!', false); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Se salvează...';
+            try {
+                await updateDoc(doc(db, 'Users', userId), { departamentAsociat: dept });
+                showStatus2(`✅ Departament "${DEPT_LABEL[dept]}" asociat cu succes!`);
+                // Actualizăm local
+                const u = allDptAdmins.find(x => x.id === userId);
+                if (u) u.departamentAsociat = dept;
+                await incarcaUseri();
+            } catch (e) {
+                showStatus2('❌ Eroare: ' + e.message, false);
+            }
+            btn.disabled = false;
+            btn.textContent = '💾 Salvează Asocierea';
+        };
+
+        window.doLogout = async function () {
+            await signOut(auth);
+            document.getElementById('step-login').style.display = 'block';
+            document.getElementById('step-set').style.display = 'none';
+            document.getElementById('admin-email').value = '';
+            document.getElementById('admin-pass').value = '';
+        };
+
+        // Verifică dacă e deja logat
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, 'Users', user.uid));
+                const role = snap.exists() ? snap.data().role : 'citizen';
+                if (role === 'GstAdmin' || role === 'SysAdmin') {
+                    document.getElementById('step-login').style.display = 'none';
+                    document.getElementById('step-set').style.display = 'block';
+                    incarcaUseri();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
