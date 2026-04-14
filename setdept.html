@@ -191,10 +191,10 @@
     <div class="card">
         <div class="logo">⚓ City<span>Fix</span></div>
         <h1>Setare Departament DptAdmin</h1>
-        <p class="subtitle">Asociază un cont DptAdmin la departamentul său. Trebuie să fi logat ca <strong style="color:#fbbf24">GstAdmin</strong> sau <strong style="color:#fbbf24">SysAdmin</strong>.</p>
+        <p class="subtitle">Loghează-te cu contul tău <strong style="color:#60a5fa">DptAdmin</strong> pentru a-ți seta departamentul, sau cu <strong style="color:#fbbf24">GstAdmin</strong> pentru a gestiona toți adminii de departament.</p>
 
         <div class="warning-box">
-            ⚠️ Această pagină modifică direct baza de date Firestore. Folosește-o doar dacă știi ce faci.
+            ⚠️ Această pagină scrie direct în baza de date Firestore. Folosește-o o singură dată pentru a configura contul.
         </div>
 
         <!-- STEP 1: Autentificare -->
@@ -208,7 +208,30 @@
             <a href="index.html"><button class="btn btn-secondary" type="button">← Înapoi la pagina principală</button></a>
         </div>
 
-        <!-- STEP 2: Asociere departament -->
+        <!-- STEP 2a: DptAdmin – setare departament propriu -->
+        <div id="step-self" style="display:none;">
+            <div id="status-self" style="display:none;" class="ok"></div>
+
+            <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:10px;padding:12px 16px;font-size:.82rem;color:#93c5fd;margin-bottom:20px;">
+                👤 Logat ca <strong id="self-email" style="color:#60a5fa;"></strong>
+            </div>
+
+            <label>Departamentul tău</label>
+            <select id="sel-dept-self">
+                <option value="">— Alege departamentul —</option>
+                <option value="infrastructura">🕳️ Infrastructură</option>
+                <option value="iluminat">💡 Iluminat Public</option>
+                <option value="curatenie">♻️ Curățenie</option>
+                <option value="parcuri">🌳 Spații Verzi</option>
+                <option value="altele">⚙️ Altele</option>
+            </select>
+
+            <button class="btn btn-primary" id="btn-salveaza-self" onclick="seteazaDepartamentPropriu()">💾 Salvează și continuă</button>
+            <button class="btn btn-secondary" id="btn-manual-redirect" style="display:none;background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:#4ade80;" onclick="redirectManual()">➡ Mergi la Panoul DptAdmin →</button>
+            <button class="btn btn-secondary" onclick="doLogout()">🚪 Delogare</button>
+        </div>
+
+        <!-- STEP 2b: GstAdmin/SysAdmin – gestionare toți DptAdmins -->
         <div id="step-set" style="display:none;">
             <div id="status-box2" style="display:none;" class="ok"></div>
 
@@ -280,6 +303,24 @@
             setTimeout(() => box.style.display = 'none', 3500);
         }
 
+        let currentUserUid  = null;
+        let currentUserRole = null;
+
+        function afiseazaInterfataLogat(role, userData) {
+            document.getElementById('step-login').style.display = 'none';
+            if (role === 'DptAdmin') {
+                // Modul self-service
+                document.getElementById('self-email').textContent = userData.email || '';
+                const deptSel = document.getElementById('sel-dept-self');
+                if (userData.departamentAsociat) deptSel.value = userData.departamentAsociat;
+                document.getElementById('step-self').style.display = 'block';
+            } else {
+                // Modul admin complet (GstAdmin / SysAdmin)
+                document.getElementById('step-set').style.display = 'block';
+                incarcaUseri();
+            }
+        }
+
         window.doLogin = async function () {
             const email = document.getElementById('admin-email').value.trim();
             const pass  = document.getElementById('admin-pass').value;
@@ -290,23 +331,83 @@
                 const cred = await signInWithEmailAndPassword(auth, email, pass);
                 const uid  = cred.user.uid;
                 const snap = await getDoc(doc(db, 'Users', uid));
-                const role = snap.exists() ? snap.data().role : 'citizen';
-                if (role !== 'GstAdmin' && role !== 'SysAdmin') {
+                const data = snap.exists() ? snap.data() : {};
+                const role = data.role || 'citizen';
+
+                if (!['GstAdmin', 'SysAdmin', 'DptAdmin'].includes(role)) {
                     await signOut(auth);
-                    showStatus('❌ Acces interzis! Doar GstAdmin sau SysAdmin pot folosi acest instrument.', false);
+                    showStatus('❌ Acces interzis! Doar conturile de admin pot folosi acest instrument.', false);
                     btn.disabled = false;
                     btn.textContent = '🔐 Autentifică-te';
                     return;
                 }
-                // Logare reușită
-                document.getElementById('step-login').style.display = 'none';
-                document.getElementById('step-set').style.display = 'block';
-                incarcaUseri();
+
+                currentUserUid  = uid;
+                currentUserRole = role;
+                afiseazaInterfataLogat(role, { ...data, email: cred.user.email });
             } catch (e) {
                 showStatus('❌ ' + e.message, false);
                 btn.disabled = false;
                 btn.textContent = '🔐 Autentifică-te';
             }
+        };
+
+        /* ── DptAdmin: setare departament propriu ── */
+        window.seteazaDepartamentPropriu = async function () {
+            const dept = document.getElementById('sel-dept-self').value;
+            const btn  = document.getElementById('btn-salveaza-self');
+            const box  = document.getElementById('status-self');
+            const manualBtn = document.getElementById('btn-manual-redirect');
+
+            if (!dept) {
+                box.textContent = '❌ Alege un departament!';
+                box.className = 'err';
+                box.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Se salvează...';
+            box.style.display = 'none';
+
+            try {
+                await updateDoc(doc(db, 'Users', currentUserUid), { departamentAsociat: dept });
+                box.innerHTML = `✅ Departament <strong>"${DEPT_LABEL[dept]}"</strong> setat cu succes! Redirecționare automată...`;
+                box.className = 'ok';
+                box.style.display = 'block';
+                if (manualBtn) manualBtn.style.display = 'block';
+                setTimeout(() => window.location.href = 'dptadmin.html', 1800);
+            } catch (e) {
+                // Eroare frecventă = reguli Firestore nu permit scrierea
+                const estePerms = e.code === 'permission-denied' || e.message.includes('permission') || e.message.includes('PERMISSION_DENIED');
+                if (estePerms) {
+                    box.innerHTML = `
+                        <strong>⚠️ Regulile Firestore blochează scrierea.</strong><br>
+                        <span style="font-size:.8rem;opacity:.85;">
+                            Du-te la <a href="https://console.firebase.google.com/project/galati-city-fix/firestore/rules" target="_blank" style="color:#fbbf24;">Firebase Console → Firestore → Rules</a>
+                            și adaugă temporar:<br>
+                            <code style="font-size:.75rem;background:rgba(0,0,0,.3);padding:3px 6px;border-radius:4px;">allow write: if request.auth != null;</code><br><br>
+                            SAU cere unui GstAdmin să seteze câmpul din <a href="setdept.html" style="color:#60a5fa;">setdept.html</a>.
+                        </span>`;
+                    box.className = 'err';
+                } else {
+                    box.textContent = '❌ Eroare: ' + e.message;
+                    box.className = 'err';
+                }
+                box.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = '💾 Încearcă din nou';
+
+                // Chiar dacă nu s-a salvat, oferim redirect manual
+                if (manualBtn) {
+                    manualBtn.style.display = 'block';
+                    manualBtn.dataset.dept = dept;
+                }
+            }
+        };
+
+        window.redirectManual = function() {
+            window.location.href = 'dptadmin.html';
         };
 
         async function incarcaUseri() {
@@ -387,19 +488,23 @@
             await signOut(auth);
             document.getElementById('step-login').style.display = 'block';
             document.getElementById('step-set').style.display = 'none';
+            document.getElementById('step-self').style.display = 'none';
             document.getElementById('admin-email').value = '';
             document.getElementById('admin-pass').value = '';
+            currentUserUid  = null;
+            currentUserRole = null;
         };
 
         // Verifică dacă e deja logat
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await getDoc(doc(db, 'Users', user.uid));
-                const role = snap.exists() ? snap.data().role : 'citizen';
-                if (role === 'GstAdmin' || role === 'SysAdmin') {
-                    document.getElementById('step-login').style.display = 'none';
-                    document.getElementById('step-set').style.display = 'block';
-                    incarcaUseri();
+                const data = snap.exists() ? snap.data() : {};
+                const role = data.role || 'citizen';
+                if (['GstAdmin', 'SysAdmin', 'DptAdmin'].includes(role)) {
+                    currentUserUid  = user.uid;
+                    currentUserRole = role;
+                    afiseazaInterfataLogat(role, { ...data, email: user.email });
                 }
             }
         });
