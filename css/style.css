@@ -10,6 +10,8 @@
             position: sticky; top: 0; z-index: 100;
         }
         .navbar-brand-text { font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -0.3px; }
+        .nav-brand-icon { font-size: 1.5rem; }
+        .nav-link-admin { color: #f0c040 !important; }
         .nav-link-custom {
             color: rgba(255,255,255,0.65) !important;
             font-weight: 500; font-size: 0.9rem;

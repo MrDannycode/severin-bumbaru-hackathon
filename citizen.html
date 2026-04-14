@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/cont.css">
+    <link rel="stylesheet" href="css/citizen.css">
 </head>
 
 <body>
@@ -20,13 +21,12 @@
     <nav class="navbar-custom">
         <div class="container d-flex align-items-center justify-content-between">
             <a class="d-flex align-items-center gap-2 text-decoration-none" href="index.html">
-                <span style="font-size:1.5rem;">⚓</span>
+                <span class="nav-brand-icon">⚓</span>
                 <span class="navbar-brand-text">CityFix Galați</span>
             </a>
             <div class="d-flex align-items-center gap-1">
                 <a href="index.html" class="nav-link-custom">Acasă</a>
-                <a href="admin.html" class="nav-link-custom d-none" id="btnAdmin"
-                    style="color:#f0c040 !important;">Admin</a>
+                <a href="admin.html" class="nav-link-custom nav-link-admin d-none" id="btnAdmin">Admin</a>
                 <button class="btn-nav-login ms-2" id="btnLogin">⚙ Cont</button>
             </div>
         </div>
@@ -107,7 +107,7 @@
                 </div>
                 <div id="my-sesizari-list">
                     <div class="dash-loading">
-                        <div class="spinner-border spinner-border-sm" style="color:#4da6ff;" role="status"></div>
+                        <div class="spinner-border spinner-border-sm dash-spinner" role="status"></div>
                         <span>Se încarcă sesizările...</span>
                     </div>
                 </div>
